@@ -206,8 +206,8 @@ def get_data_incremental_strategy(name, tasks, data_dir="./store/datasets",
         config = DATASET_CONFIGS.get('eventsym', None)
 
         # pick the folder your framework uses (adjust if your args differ)
-        train_root = os.path.join(data_dir, "EventSym", "training")
-        test_root  = os.path.join(data_dir, "EventSym", "testing")
+        train_root = os.path.join(data_dir, "eventSym", "training")
+        test_root  = os.path.join(data_dir, "eventSym", "testing")
 
         # count leaf classes: root/<class>/<subclass>/
         leaf_classes = []
