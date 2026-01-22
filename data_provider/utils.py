@@ -21,7 +21,7 @@ class DatasetNames(Enum):
     NCALTECH256 = "ncaltech256"
     NCALTECH101 = "ncaltech101"
     NMNIST = "nmnist"
-    EVENTSYM = "eventSym"
+    EVENTSYM = "eventsym"
 
 def get_output_classes_number(dataset):
     """
