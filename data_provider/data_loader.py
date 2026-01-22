@@ -232,6 +232,7 @@ def get_data_incremental_strategy(name, tasks, data_dir="./store/datasets",
                     labels_all += list(getattr(tmp_train, "labels", []))
                 labels_all += list(getattr(tmp_test, "labels", []))
                 n_classes = int(len(set(labels_all)))
+                print(labels_all)
 
             # check for number of tasks
             if tasks > n_classes:
