@@ -201,68 +201,58 @@ def get_data_incremental_strategy(name, tasks, data_dir="./store/datasets",
                 if not only_test:
                     train_datasets.append(SubDataset(nmnist_train, labels, target_transform=target_transform))
                 test_datasets.append(SubDataset(nmnist_test, labels, target_transform=target_transform))
-    elif name.lower() in ["eventsym", "eventSym".lower()]:
-        # configurations
-        config = DATASET_CONFIGS["eventSym"]
+    elif name.upper() in ["EVENTSYM", "EVENTSYM3", "EVENTSYM_VOXEL", "EVENTSYM_HIST"]:
+    # --- EventSym: leaf folders are the classes ---
+    config = DATASET_CONFIGS.get('eventsym', None)
 
-        if not only_config:
-            # ---- load datasets first so we can infer number of labels robustly ----
-            # (We load test even if only_test=True, like the other blocks.)
-            # target_transform applied after permutation is built.
+    # pick the folder your framework uses (adjust if your args differ)
+    train_root = os.path.join(data_dir, "EventSym", "training")
+    test_root  = os.path.join(data_dir, "EventSym", "testing")
 
-            # temporary load to get label count if you don't store it in config
-            tmp_train = None
+    # count leaf classes: root/<class>/<subclass>/
+    leaf_classes = []
+    if os.path.isdir(train_root):
+        for class_name in sorted(os.listdir(train_root)):
+            class_dir = os.path.join(train_root, class_name)
+            if not os.path.isdir(class_dir):
+                continue
+            for sub_name in sorted(os.listdir(class_dir)):
+                sub_dir = os.path.join(class_dir, sub_name)
+                if os.path.isdir(sub_dir):
+                    leaf_classes.append((class_name, sub_name))
+
+    n_classes = len(leaf_classes)
+
+    if n_classes == 0:
+        raise ValueError(
+            f"EventSym classes not found. Expected structure: {train_root}/<class>/<subclass>/*.npy"
+        )
+
+    # check tasks
+    if tasks > n_classes:
+        raise ValueError(f"Experiment 'eventSym' cannot have more than {n_classes} tasks!")
+
+    classes_per_task = int(np.floor(n_classes / tasks)) if tasks > 0 else n_classes
+
+    if not only_config:
+        # create datasets
+        if not only_test:
+            eventsym_train = get_dataset('eventsym', type_="train", directory=data_dir,
+                                         verbose=verbose, target_transform=None)
+        eventsym_test = get_dataset('eventsym', type_="test", directory=data_dir,
+                                    verbose=verbose, target_transform=None)
+
+        # build label groups per task
+        labels_per_task = [
+            list(np.array(range(classes_per_task)) + classes_per_task * task_id) for task_id in range(tasks)
+        ]
+
+        train_datasets, test_datasets = [], []
+        for labels in labels_per_task:
             if not only_test:
-                tmp_train = get_dataset("eventSym", type_="train", directory=data_dir,
-                                        verbose=verbose, target_transform=None)
+                train_datasets.append(SubDataset(eventsym_train, labels, target_transform=None))
+            test_datasets.append(SubDataset(eventsym_test, labels, target_transform=None))
 
-            tmp_test = get_dataset("eventSym", type_="test", directory=data_dir,
-                                verbose=verbose, target_transform=None)
-
-            # check for number of tasks
-            if tasks > 3:
-                raise ValueError(f"Experiment 'eventSym' cannot have more than {3} tasks!")
-
-            classes_per_task = int(np.floor(3 / tasks))
-            if classes_per_task < 1:
-                raise ValueError(
-                    f"Too many tasks ({tasks}) for eventSym with {3} classes "
-                    f"(classes_per_task becomes {classes_per_task})."
-                )
-            config['classes'] = classes_per_task * tasks
-
-            # ---- permutation to shuffle label ids (seed-dependent externally) ----
-            permutation = np.random.permutation(list(range(3)))
-            target_transform = transforms.Lambda(lambda y, x=permutation: int(x[y]))
-
-            # ---- load train/test datasets with permutation transform ----
-            if not only_test:
-                eventSym_train = get_dataset("eventSym", type_="train", directory=data_dir,
-                                            verbose=verbose, target_transform=target_transform)
-            eventSym_test = get_dataset("eventSym", type_="test", directory=data_dir,
-                                        verbose=verbose, target_transform=target_transform)
-
-            # ---- generate labels-per-task ----
-            labels_per_task = [
-                list(np.array(range(classes_per_task)) + classes_per_task * task_id)
-                for task_id in range(tasks)
-            ]
-
-            # Handle remainder labels (if n_classes not divisible by tasks):
-            remainder = 3 - classes_per_task * tasks
-            if remainder > 0:
-                labels_per_task[-1] = labels_per_task[-1] + list(
-                    np.array(range(remainder)) + classes_per_task * tasks
-                )
-
-            # ---- split into sub-tasks ----
-            train_datasets, test_datasets = [], []
-            for labels in labels_per_task:
-                # After SubDataset filtering, we usually do NOT need an extra target_transform
-                # because dataset already permuted labels. Keep None (same as your NCALTECH blocks).
-                if not only_test:
-                    train_datasets.append(SubDataset(eventSym_train, labels, target_transform=None))
-                test_datasets.append(SubDataset(eventSym_test, labels, target_transform=None))
 
     else:
         raise RuntimeError('Given undefined experiment: {}'.format(name))

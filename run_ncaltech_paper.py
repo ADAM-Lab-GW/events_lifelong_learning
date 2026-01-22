@@ -229,8 +229,6 @@ if __name__ == '__main__':
             dataset_name_suffix = "256"
         elif classes_tot == 101:
             dataset_name_suffix = "101"
-        elif classes_tot == 101:
-            dataset_name_suffix = "101"
         elif classes_tot == 3:
             dataset_name_suffix = "3"
         else:
@@ -415,10 +413,10 @@ if __name__ == '__main__':
         plot_name = "summary_{}-tasks_{}-iters_{}-lr_{}-c_{}-prop_{}-z_{}".format(
             args.experiment, args.tasks, args.iters, args.lr, args.dg_c, args.dg_si_prop, args.z_dim)
         if args.experiment != "NMNIST":
-            classes_tot = 3
+            classes_tot = int(re.search(r'\d+', args.experiment).group())
         else:
             classes_tot = 10
-        dataset_name = "N-Caltech"
+        dataset_name = "eventSym"
         dataset_name_suffix = ""
         if classes_tot == 12:
             dataset_name_suffix = "256-12"
@@ -427,7 +425,7 @@ if __name__ == '__main__':
         elif classes_tot == 100:
             dataset_name_suffix = "101"
         elif classes_tot == 3:
-            dataset_name_suffix = "40"
+            dataset_name_suffix = "3"
         else:
             dataset_name = "N-MNIST"
             dataset_name_suffix = ""
@@ -547,7 +545,7 @@ if __name__ == '__main__':
         plot_name = "dc_BIRpH_{}-tasks_{}-iters_{}-lr_{}-c_{}-prop_{}-z_{}".format(
             args.experiment, args.tasks, args.iters, args.lr, args.dg_c, args.dg_si_prop, args.z_dim)
         if args.experiment != "NMNIST":
-            classes_tot = 3
+            classes_tot = int(re.search(r'\d+', args.experiment).group())
         else:
             classes_tot = 10
         dataset_name = "N-Caltech"
@@ -558,8 +556,6 @@ if __name__ == '__main__':
             dataset_name_suffix = "256"
         elif classes_tot == 100:
             dataset_name_suffix = "101"
-        elif classes_tot == 3:
-            dataset_name_suffix = "40"
         else:
             dataset_name = "N-MNIST"
             dataset_name_suffix = ""
