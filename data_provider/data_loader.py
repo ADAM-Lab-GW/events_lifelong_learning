@@ -219,35 +219,20 @@ def get_data_incremental_strategy(name, tasks, data_dir="./store/datasets",
             tmp_test = get_dataset("eventSym", type_="test", directory=data_dir,
                                 verbose=verbose, target_transform=None)
 
-            # Determine number of classes (subclasses) for CL
-            # Prefer dataset-provided nr_classes if available, else infer from labels
-            if hasattr(tmp_test, "nr_classes"):
-                n_classes = int(tmp_test.nr_classes)
-            elif tmp_train is not None and hasattr(tmp_train, "nr_classes"):
-                n_classes = int(tmp_train.nr_classes)
-            else:
-                # last-resort inference (slower): scan labels
-                labels_all = []
-                if tmp_train is not None:
-                    labels_all += list(getattr(tmp_train, "labels", []))
-                labels_all += list(getattr(tmp_test, "labels", []))
-                n_classes = int(len(set(labels_all)))
-                print(labels_all)
-
             # check for number of tasks
-            if tasks > n_classes:
-                raise ValueError(f"Experiment 'eventSym' cannot have more than {n_classes} tasks!")
+            if tasks > 3:
+                raise ValueError(f"Experiment 'eventSym' cannot have more than {3} tasks!")
 
-            classes_per_task = int(np.floor(n_classes / tasks))
+            classes_per_task = int(np.floor(3 / tasks))
             if classes_per_task < 1:
                 raise ValueError(
-                    f"Too many tasks ({tasks}) for eventSym with {n_classes} classes "
+                    f"Too many tasks ({tasks}) for eventSym with {3} classes "
                     f"(classes_per_task becomes {classes_per_task})."
                 )
             config['classes'] = classes_per_task * tasks
 
             # ---- permutation to shuffle label ids (seed-dependent externally) ----
-            permutation = np.random.permutation(list(range(n_classes)))
+            permutation = np.random.permutation(list(range(3)))
             target_transform = transforms.Lambda(lambda y, x=permutation: int(x[y]))
 
             # ---- load train/test datasets with permutation transform ----
@@ -264,7 +249,7 @@ def get_data_incremental_strategy(name, tasks, data_dir="./store/datasets",
             ]
 
             # Handle remainder labels (if n_classes not divisible by tasks):
-            remainder = n_classes - classes_per_task * tasks
+            remainder = 3 - classes_per_task * tasks
             if remainder > 0:
                 labels_per_task[-1] = labels_per_task[-1] + list(
                     np.array(range(remainder)) + classes_per_task * tasks
