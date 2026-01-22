@@ -243,6 +243,7 @@ def get_data_incremental_strategy(name, tasks, data_dir="./store/datasets",
                     f"Too many tasks ({tasks}) for eventSym with {n_classes} classes "
                     f"(classes_per_task becomes {classes_per_task})."
                 )
+            config['classes'] = classes_per_task * tasks
 
             # ---- permutation to shuffle label ids (seed-dependent externally) ----
             permutation = np.random.permutation(list(range(n_classes)))
@@ -281,7 +282,7 @@ def get_data_incremental_strategy(name, tasks, data_dir="./store/datasets",
         raise RuntimeError('Given undefined experiment: {}'.format(name))
 
     # If needed, update number of (total) classes in the config-dictionary
-    config['classes'] = classes_per_task * tasks
+    
 
     # Return tuple of train-, validation- and test-dataset, config-dictionary and number of classes per task
     return config if only_config else ((train_datasets, test_datasets), config, classes_per_task)
