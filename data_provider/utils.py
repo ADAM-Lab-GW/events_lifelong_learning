@@ -9,7 +9,8 @@ from enum import Enum
 NCALTECH12_OUTPUT_CLASSES_NUMBER = 12
 NCALTECH256_OUTPUT_CLASSES_NUMBER = 257
 NCALTECH101_OUTPUT_CLASSES_NUMBER = 101
-NMNIST_OUTPUT_CLASSES_NUMBER = 10
+NMNIST_OUTPUT_CLASSES_NUMBER = 10   
+EVENTSYM_OUTPUT_CLASSES_NUMBER = 3  # Assuming eventSym has 3 classes; adjust as necessary.
 
 
 class DatasetNames(Enum):
@@ -20,7 +21,7 @@ class DatasetNames(Enum):
     NCALTECH256 = "ncaltech256"
     NCALTECH101 = "ncaltech101"
     NMNIST = "nmnist"
-
+    EVENTSYM = "eventSym"
 
 def get_output_classes_number(dataset):
     """
@@ -36,7 +37,6 @@ def get_output_classes_number(dataset):
     if dataset == DatasetNames.NCALTECH101.value:
         return NCALTECH101_OUTPUT_CLASSES_NUMBER
     if dataset == DatasetNames.NMNIST.value:
-        return NMNIST_OUTPUT_CLASSES_NUMBER
-
-
-
+        return NMNIST_OUTPUT_CLASSES_NUMBER 
+    if dataset == DatasetNames.EVENTSYM.value:
+        return EVENTSYM_OUTPUT_CLASSES_NUMBER

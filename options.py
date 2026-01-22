@@ -55,8 +55,8 @@ def add_eval_options(parser):
 
 def add_task_options(parser):
     task_params = parser.add_argument_group('Task Parameters')
-    tasks = ['NCALTECH12', 'NCALTECH256', 'NCALTECH101', 'NMNIST']
-    task_default = 'NCALTECH12'
+    tasks = ['NCALTECH12', 'NCALTECH256', 'NCALTECH101', 'NMNIST', 'eventSym']
+    task_default = 'eventSym'
     task_params.add_argument('--experiment', type=str, default=task_default, choices=tasks)
     task_params.add_argument('--tasks', type=int, help='number of tasks')
 

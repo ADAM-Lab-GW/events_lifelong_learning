@@ -2,7 +2,7 @@
 
 # Dataset:
 dataset:
-  name: 'NCALTECH101'   # ['NCALTECH12', 'NCALTECH256', 'NCALTECH101', 'NMNIST']
+  name: 'eventSym'   # ['NCALTECH12', 'NCALTECH256', 'NCALTECH101', 'NMNIST']
 #Synaptic Intelligence:
 si:
   strength_regulator: None  # 'c' in the Equation 3.12
@@ -17,11 +17,36 @@ setup:
   scenario: 2  # [1, 2]
   seed: 20
   number_seeds: 1
-  tasks: 20
+  tasks: 3
   iterations: 200  # Each iteration includes data from the dataset of size 'batch_size'
   batch_size: 20
   gating_proportion_decoder: 0.6  # The fraction of neurons in a decor that are gated (activations are set to zero)
   z_dimension: 4096  # The size of the latent variable representation (VAE)
   batch_normalization: true  # batch normalization for fully connected layers
   learning_rate: 0.0001
+
+
+# dataset:
+#   name: 'NCALTECH101'   # ['NCALTECH12', 'NCALTECH256', 'NCALTECH101', 'NMNIST']
+# #Synaptic Intelligence:
+# si:
+#   strength_regulator: None  # 'c' in the Equation 3.12
+# # Habituation
+# habituation:
+#   decay_rate:  None  # in range from 0 to 1; without SI
+#   decay_rate_si:  None  # with SI
+#   top_neurons: None  # only the neurons with the highest activation values are allowed to be habituated. This parameter controls the fraction of neurons that wil be habituated in the f2 layer.
+#   top_neurons_si: None  # with SI
+# # Other parameters:
+# setup:
+#   scenario: 2  # [1, 2]
+#   seed: 20
+#   number_seeds: 1
+#   tasks: 20
+#   iterations: 200  # Each iteration includes data from the dataset of size 'batch_size'
+#   batch_size: 20
+#   gating_proportion_decoder: 0.6  # The fraction of neurons in a decor that are gated (activations are set to zero)
+#   z_dimension: 4096  # The size of the latent variable representation (VAE)
+#   batch_normalization: true  # batch normalization for fully connected layers
+#   learning_rate: 0.0001
 
