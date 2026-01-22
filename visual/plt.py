@@ -18,7 +18,7 @@ import seaborn as sns
 plt.style.use('seaborn')
 
 tex_fonts = {
-    "text.usetex": True,
+    "text.usetex": False,
     "font.family": "serif",
     "axes.labelsize": 10,
     "font.size": 10,
