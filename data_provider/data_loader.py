@@ -202,56 +202,56 @@ def get_data_incremental_strategy(name, tasks, data_dir="./store/datasets",
                     train_datasets.append(SubDataset(nmnist_train, labels, target_transform=target_transform))
                 test_datasets.append(SubDataset(nmnist_test, labels, target_transform=target_transform))
     elif name.upper() in ["EVENTSYM", "EVENTSYM3", "EVENTSYM_VOXEL", "EVENTSYM_HIST"]:
-    # --- EventSym: leaf folders are the classes ---
-    config = DATASET_CONFIGS.get('eventsym', None)
+        # --- EventSym: leaf folders are the classes ---
+        config = DATASET_CONFIGS.get('eventsym', None)
 
-    # pick the folder your framework uses (adjust if your args differ)
-    train_root = os.path.join(data_dir, "EventSym", "training")
-    test_root  = os.path.join(data_dir, "EventSym", "testing")
+        # pick the folder your framework uses (adjust if your args differ)
+        train_root = os.path.join(data_dir, "EventSym", "training")
+        test_root  = os.path.join(data_dir, "EventSym", "testing")
 
-    # count leaf classes: root/<class>/<subclass>/
-    leaf_classes = []
-    if os.path.isdir(train_root):
-        for class_name in sorted(os.listdir(train_root)):
-            class_dir = os.path.join(train_root, class_name)
-            if not os.path.isdir(class_dir):
-                continue
-            for sub_name in sorted(os.listdir(class_dir)):
-                sub_dir = os.path.join(class_dir, sub_name)
-                if os.path.isdir(sub_dir):
-                    leaf_classes.append((class_name, sub_name))
+        # count leaf classes: root/<class>/<subclass>/
+        leaf_classes = []
+        if os.path.isdir(train_root):
+            for class_name in sorted(os.listdir(train_root)):
+                class_dir = os.path.join(train_root, class_name)
+                if not os.path.isdir(class_dir):
+                    continue
+                for sub_name in sorted(os.listdir(class_dir)):
+                    sub_dir = os.path.join(class_dir, sub_name)
+                    if os.path.isdir(sub_dir):
+                        leaf_classes.append((class_name, sub_name))
 
-    n_classes = len(leaf_classes)
+        n_classes = len(leaf_classes)
 
-    if n_classes == 0:
-        raise ValueError(
-            f"EventSym classes not found. Expected structure: {train_root}/<class>/<subclass>/*.npy"
-        )
+        if n_classes == 0:
+            raise ValueError(
+                f"EventSym classes not found. Expected structure: {train_root}/<class>/<subclass>/*.npy"
+            )
 
-    # check tasks
-    if tasks > n_classes:
-        raise ValueError(f"Experiment 'eventSym' cannot have more than {n_classes} tasks!")
+        # check tasks
+        if tasks > n_classes:
+            raise ValueError(f"Experiment 'eventSym' cannot have more than {n_classes} tasks!")
 
-    classes_per_task = int(np.floor(n_classes / tasks)) if tasks > 0 else n_classes
+        classes_per_task = int(np.floor(n_classes / tasks)) if tasks > 0 else n_classes
 
-    if not only_config:
-        # create datasets
-        if not only_test:
-            eventsym_train = get_dataset('eventsym', type_="train", directory=data_dir,
-                                         verbose=verbose, target_transform=None)
-        eventsym_test = get_dataset('eventsym', type_="test", directory=data_dir,
-                                    verbose=verbose, target_transform=None)
-
-        # build label groups per task
-        labels_per_task = [
-            list(np.array(range(classes_per_task)) + classes_per_task * task_id) for task_id in range(tasks)
-        ]
-
-        train_datasets, test_datasets = [], []
-        for labels in labels_per_task:
+        if not only_config:
+            # create datasets
             if not only_test:
-                train_datasets.append(SubDataset(eventsym_train, labels, target_transform=None))
-            test_datasets.append(SubDataset(eventsym_test, labels, target_transform=None))
+                eventsym_train = get_dataset('eventsym', type_="train", directory=data_dir,
+                                            verbose=verbose, target_transform=None)
+            eventsym_test = get_dataset('eventsym', type_="test", directory=data_dir,
+                                        verbose=verbose, target_transform=None)
+
+            # build label groups per task
+            labels_per_task = [
+                list(np.array(range(classes_per_task)) + classes_per_task * task_id) for task_id in range(tasks)
+            ]
+
+            train_datasets, test_datasets = [], []
+            for labels in labels_per_task:
+                if not only_test:
+                    train_datasets.append(SubDataset(eventsym_train, labels, target_transform=None))
+                test_datasets.append(SubDataset(eventsym_test, labels, target_transform=None))
 
 
     else:
