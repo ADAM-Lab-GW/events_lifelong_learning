@@ -201,57 +201,55 @@ def get_data_incremental_strategy(name, tasks, data_dir="./store/datasets",
                 if not only_test:
                     train_datasets.append(SubDataset(nmnist_train, labels, target_transform=target_transform))
                 test_datasets.append(SubDataset(nmnist_test, labels, target_transform=target_transform))
-    elif name.upper() in ["EVENTSYM", "EVENTSYM3", "EVENTSYM_VOXEL", "EVENTSYM_HIST"]:
-        # --- EventSym: leaf folders are the classes ---
+    elif name.upper() in ["EVENTSYM", "EVENTSYM3"]:
+        # --- EventSym (flat): root/EventSym/training/<class_id>/*.npy ---
         config = DATASET_CONFIGS.get('eventsym', None)
 
         # pick the folder your framework uses (adjust if your args differ)
         train_root = os.path.join(data_dir, "eventSym", "training")
         test_root  = os.path.join(data_dir, "eventSym", "testing")
 
-        # count leaf classes: root/<class>/<subclass>/
-        leaf_classes = []
+        # Count class folders under training/
+        class_folders = []
         if os.path.isdir(train_root):
-            for class_name in sorted(os.listdir(train_root)):
-                class_dir = os.path.join(train_root, class_name)
-                if not os.path.isdir(class_dir):
-                    continue
-                for sub_name in sorted(os.listdir(class_dir)):
-                    sub_dir = os.path.join(class_dir, sub_name)
-                    if os.path.isdir(sub_dir):
-                        leaf_classes.append((class_name, sub_name))
+            for d in sorted(os.listdir(train_root)):
+                p = os.path.join(train_root, d)
+                if os.path.isdir(p):
+                    class_folders.append(d)
 
-        n_classes = len(leaf_classes)
-
+        n_classes = len(class_folders)
         if n_classes == 0:
             raise ValueError(
-                f"EventSym classes not found. Expected structure: {train_root}/<class>/<subclass>/*.npy"
+                f"EventSym classes not found. Expected: {train_root}/<class_id>/*.npy"
             )
 
-        # check tasks
+        # check for number of tasks
         if tasks > n_classes:
             raise ValueError(f"Experiment 'eventSym' cannot have more than {n_classes} tasks!")
 
         classes_per_task = int(np.floor(n_classes / tasks)) if tasks > 0 else n_classes
 
         if not only_config:
-            # create datasets
+            # prepare train and test datasets with all classes
             if not only_test:
                 eventsym_train = get_dataset('eventsym', type_="train", directory=data_dir,
                                             verbose=verbose, target_transform=None)
             eventsym_test = get_dataset('eventsym', type_="test", directory=data_dir,
                                         verbose=verbose, target_transform=None)
 
-            # build label groups per task
+            # generate labels-per-task
             labels_per_task = [
-                list(np.array(range(classes_per_task)) + classes_per_task * task_id) for task_id in range(tasks)
+                list(np.array(range(classes_per_task)) + classes_per_task * task_id)
+                for task_id in range(tasks)
             ]
 
+            # split into sub-tasks
             train_datasets, test_datasets = [], []
             for labels in labels_per_task:
                 if not only_test:
                     train_datasets.append(SubDataset(eventsym_train, labels, target_transform=None))
                 test_datasets.append(SubDataset(eventsym_test, labels, target_transform=None))
+
 
 
     else:
