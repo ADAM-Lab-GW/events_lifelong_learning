@@ -100,9 +100,11 @@ def plot_lines(list_with_lines, x_axes=None, line_names=None, colors=None, title
     '''
 
     # if needed, generate default x-axis
-    if x_axes == None:
-        n_obs = len(list_with_lines[0])
-        x_axes = list(range(n_obs))
+    # if needed, generate default x-axis (also handle empty)
+    if x_axes is None or len(x_axes) == 0:
+        n_obs = len(list_with_lines[0]) if len(list_with_lines) > 0 else 0
+        x_axes = list(range(1, n_obs + 1))  # start at 1 to avoid divide-by-zero later
+
 
     # if needed, generate default line-names
     if line_names == None:
@@ -112,17 +114,20 @@ def plot_lines(list_with_lines, x_axes=None, line_names=None, colors=None, title
     # make plot
     size = (15, 6) if figsize is None else figsize
     f, axarr = plt.subplots(1, 1, figsize=size)
-    axarr.xaxis.set_ticks(np.arange(int(max(x_axes) / len(x_axes)),
-                                    int(max(x_axes) + 1),
-                                    int(int(max(x_axes) / len(x_axes)) / (1 if len(x_axes) <= 10 else 1))  # 2 (1)
-                                    )
-                          )
-    axarr.set_xticklabels(np.arange(int(max(x_axes) / len(x_axes)),
-                                    int(max(x_axes) + 1),
-                                    int(int(max(x_axes) / len(x_axes)) / (1 if len(x_axes) <= 10 else 1))  # 2 (1)
-                                    ),
-                          rotation=0,#45 if max(x_axes) > 12 else 0,
-                          fontsize=16*font_scale)
+    # ---- robust ticks ----
+    x_min = int(min(x_axes))
+    x_max = int(max(x_axes))
+
+    # choose a reasonable step (avoid 0)
+    if len(x_axes) <= 10:
+        step = 1
+    else:
+        step = max(1, int((x_max - x_min) / 10))
+
+    ticks = np.arange(x_min, x_max + 1, step)
+    axarr.xaxis.set_ticks(ticks)
+    axarr.set_xticklabels(ticks, rotation=0, fontsize=16 * font_scale)
+
 
     def transform(x):
         return x / 2  # 2 for long horizon (5) (2)
@@ -133,7 +138,10 @@ def plot_lines(list_with_lines, x_axes=None, line_names=None, colors=None, title
     secax = axarr.secondary_xaxis('top', functions=(transform, reverse))
     secax.set_xlabel("Number of episodes", fontsize=20 * font_scale, labelpad=14)
     # secax.set_ticks(list(range(1, 51)))  # for long horizon
-    secax.set_ticks(list(range(1, 6)))  # for short horizon
+    # secondary x-axis ticks: match count but keep readable
+    sec_ticks = list(range(1, min(6, x_max + 1)))
+    secax.set_ticks(sec_ticks)
+  # for short horizon
     # secax.set_ticks(list(range(1, 21)))
 
     n = 1  # Keeps every nth label  (5 for long horizon) (1 for short horizon)
@@ -167,9 +175,14 @@ def plot_lines(list_with_lines, x_axes=None, line_names=None, colors=None, title
                    linewidth=1, marker=markers[task_id] if with_dots else None, linestyle=linestyle if type(linestyle)==str else linestyle[task_id])
 
     # Chance line:
+    # Chance line: for class-incremental accuracy ~ 1 / (#classes seen so far)
     if chance_line:
-        values = np.ones((len(x_axes),)) / np.arange(x_axes[0], x_axes[-1] + x_axes[0], x_axes[0])
+        # if x_axes represent "#classes seen", use that directly
+        denom = np.array(x_axes, dtype=np.float32)
+        denom = np.clip(denom, 1.0, None)
+        values = 1.0 / denom
         axarr.plot(x_axes, values, label="Chance", color="grey")
+
 
     # add horizontal line
     if h_line is not None:

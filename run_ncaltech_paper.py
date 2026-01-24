@@ -413,9 +413,15 @@ if __name__ == '__main__':
         plot_name = "summary_{}-tasks_{}-iters_{}-lr_{}-c_{}-prop_{}-z_{}".format(
             args.experiment, args.tasks, args.iters, args.lr, args.dg_c, args.dg_si_prop, args.z_dim)
         if args.experiment != "NMNIST":
-            classes_tot = int(re.search(r'\d+', args.experiment).group())
-        else:
-            classes_tot = 10
+            m = re.search(r'\d+', args.experiment)
+
+            if m is not None:
+                classes_tot = int(m.group())
+            else:
+                # fallback: infer from dataset folders (training split)
+                train_root = os.path.join(args.d_dir, "eventSym", "training")
+                classes_tot = len([d for d in os.listdir(train_root) if os.path.isdir(os.path.join(train_root, d))])
+
         dataset_name = "eventSym"
         dataset_name_suffix = ""
         if classes_tot == 12:
@@ -545,10 +551,18 @@ if __name__ == '__main__':
         plot_name = "dc_BIRpH_{}-tasks_{}-iters_{}-lr_{}-c_{}-prop_{}-z_{}".format(
             args.experiment, args.tasks, args.iters, args.lr, args.dg_c, args.dg_si_prop, args.z_dim)
         if args.experiment != "NMNIST":
-            classes_tot = int(re.search(r'\d+', args.experiment).group())
+            
+            m = re.search(r'\d+', args.experiment)
+
+            if m is not None:
+                classes_tot = int(m.group())
+            else:
+                # fallback: infer from dataset folders (training split)
+                train_root = os.path.join(args.d_dir, "eventSym", "training")
+                classes_tot = len([d for d in os.listdir(train_root) if os.path.isdir(os.path.join(train_root, d))])
         else:
             classes_tot = 10
-        dataset_name = "N-Caltech"
+        dataset_name = "eventSym"
         dataset_name_suffix = ""
         if classes_tot == 12:
             dataset_name_suffix = "256-12"
@@ -608,8 +622,9 @@ if __name__ == '__main__':
         new_ave_line = []
         new_sem_line = []
         for line_id in range(len(prec[args.seed][id])):
-            if line_id < 10:
+            if line_id < 10 and len(prec[args.seed][id]) > 10:
                 continue
+
             all_entries = [prec[seed][id][line_id] for seed in seed_list]
             new_ave_line.append(np.mean(all_entries))
             if args.n_seeds > 1:
@@ -620,7 +635,8 @@ if __name__ == '__main__':
     #ylim = (0.0, 1.0)
     xlim = None
     class_per_task = int(get_output_classes_number(args.experiment) / args.tasks)
-    figure = plt.plot_lines(ave_lines, x_axes=[class_per_task * i for i in x_axes[10:]],#[10:]],
+    
+    figure = plt.plot_lines(ave_lines, x_axes=[class_per_task * i for i in x_axes],#[10:]],
                             line_names=names, colors=colors, title=title,
                             xlabel="Number of classes learned",
                             ylabel="Test accuracy",
@@ -674,7 +690,14 @@ if __name__ == '__main__':
         plot_name = "si_BIRpSI_{}-tasks_{}-iters_{}-lr_{}-c_{}-prop_{}-z_{}".format(
             args.experiment, args.tasks, args.iters, args.lr, args.dg_c, args.dg_si_prop, args.z_dim)
         if args.experiment != "NMNIST":
-            classes_tot = int(re.search(r'\d+', args.experiment).group())
+            m = re.search(r'\d+', args.experiment)
+
+            if m is not None:
+                classes_tot = int(m.group())
+            else:
+                # fallback: infer from dataset folders (training split)
+                train_root = os.path.join(args.d_dir, "eventSym", "training")
+                classes_tot = len([d for d in os.listdir(train_root) if os.path.isdir(os.path.join(train_root, d))])
         else:
             classes_tot = 10
         dataset_name = "N-Caltech"
@@ -730,7 +753,7 @@ if __name__ == '__main__':
         for line_id in range(len(prec[args.seed][id])):
             # if line_id < 10:
             # continue
-            if line_id < 10:
+            if line_id < 10 and len(prec[args.seed][id]) > 10:
                 continue
             all_entries = [prec[seed][id][line_id] for seed in seed_list]
             new_ave_line.append(np.mean(all_entries))
@@ -742,7 +765,7 @@ if __name__ == '__main__':
     #ylim = (0.0, 1.0)
     xlim = None
     class_per_task = int(get_output_classes_number(args.experiment) / args.tasks)
-    figure = plt.plot_lines(ave_lines, x_axes=[class_per_task * i for i in x_axes[10:]],#[10:]],
+    figure = plt.plot_lines(ave_lines, x_axes=[class_per_task * i for i in x_axes],#[10:]],
                             line_names=names, colors=colors, title=title,
                             xlabel="Number of classes learned",
                             ylabel="Test accuracy",

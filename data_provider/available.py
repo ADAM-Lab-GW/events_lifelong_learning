@@ -15,7 +15,7 @@ AVAILABLE_DATASETS = {
     'ncaltech256': datasets.DatasetFolder,
     'ncaltech101': datasets.DatasetFolder,
     'nmnist': datasets.DatasetFolder,
-    'eventSym': datasets.DatasetFolder,
+    'eventsym': datasets.DatasetFolder,
 }
 
 # Specify available transforms
@@ -32,7 +32,7 @@ AVAILABLE_TRANSFORMS = {
     'nmnist': [
         transforms.ToTensor(),
     ],
-    'eventSym': [
+    'eventsym': [
         transforms.ToTensor(),
     ],
 }
@@ -43,5 +43,5 @@ DATASET_CONFIGS = {
     'ncaltech256': {'size': 40, 'channels': 1, 'classes': 257},  # TODO
     'ncaltech101': {'size': 40, 'channels': 1, 'classes': 101},  # TODO
     'nmnist': {'size': 34, 'channels': 1, 'classes': 10},  # TODO
-    'eventSym': {'size': 50, 'channels': 1, 'classes': 3},  # TODO
+    'eventsym': {'size': 50, 'channels': 1, 'classes': 3},  # TODO
 }
