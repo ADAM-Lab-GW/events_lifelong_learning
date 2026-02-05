@@ -202,53 +202,37 @@ def get_data_incremental_strategy(name, tasks, data_dir="./store/datasets",
                     train_datasets.append(SubDataset(nmnist_train, labels, target_transform=target_transform))
                 test_datasets.append(SubDataset(nmnist_test, labels, target_transform=target_transform))
     elif name.upper() in ["EVENTSYM", "EVENTSYM3"]:
-        # --- EventSym (flat): root/EventSym/training/<class_id>/*.npy ---
         config = DATASET_CONFIGS.get('eventsym', None)
 
-        # pick the folder your framework uses (adjust if your args differ)
         train_root = os.path.join(data_dir, "eventSym", "training")
         test_root  = os.path.join(data_dir, "eventSym", "testing")
 
-        # Count class folders under training/
-        class_folders = []
-        if os.path.isdir(train_root):
-            for d in sorted(os.listdir(train_root)):
-                p = os.path.join(train_root, d)
-                if os.path.isdir(p):
-                    class_folders.append(d)
+        # Build hierarchical datasets
+        if not only_test:
+            eventsym_train = HierarchicalNpyDataset(train_root, verbose=verbose)
+        eventsym_test = HierarchicalNpyDataset(test_root, verbose=verbose)
 
-        n_classes = len(class_folders)
-        if n_classes == 0:
-            raise ValueError(
-                f"EventSym classes not found. Expected: {train_root}/<class_id>/*.npy"
-            )
+        n_subclasses = len(eventsym_test.sub_to_id)
+        n_main = len(eventsym_test.main_to_id)
 
-        # check for number of tasks
-        if tasks > n_classes:
-            raise ValueError(f"Experiment 'eventSym' cannot have more than {n_classes} tasks!")
+        if tasks > n_subclasses:
+            raise ValueError(f"Experiment 'eventSym' cannot have more than {n_subclasses} tasks!")
 
-        classes_per_task = int(np.floor(n_classes / tasks)) if tasks > 0 else n_classes
+        classes_per_task = int(np.floor(n_subclasses / tasks)) if tasks > 0 else n_subclasses
 
         if not only_config:
-            # prepare train and test datasets with all classes
-            if not only_test:
-                eventsym_train = get_dataset('eventsym', type_="train", directory=data_dir,
-                                            verbose=verbose, target_transform=None)
-            eventsym_test = get_dataset('eventsym', type_="test", directory=data_dir,
-                                        verbose=verbose, target_transform=None)
-
-            # generate labels-per-task
             labels_per_task = [
                 list(np.array(range(classes_per_task)) + classes_per_task * task_id)
                 for task_id in range(tasks)
             ]
 
-            # split into sub-tasks
+            # split into sub-tasks (SubDataset must filter using y_sub)
             train_datasets, test_datasets = [], []
             for labels in labels_per_task:
                 if not only_test:
                     train_datasets.append(SubDataset(eventsym_train, labels, target_transform=None))
                 test_datasets.append(SubDataset(eventsym_test, labels, target_transform=None))
+
 
 
 
@@ -262,21 +246,48 @@ def get_data_incremental_strategy(name, tasks, data_dir="./store/datasets",
     return config if only_config else ((train_datasets, test_datasets), config, classes_per_task)
 
 
+# def load_ncaltech(train, dir_name, target_transform=None):
+#     if train:
+#         train_data_path = os.path.join(dir_name, 'training')
+#         dataset = torchvision.datasets.DatasetFolder(root=train_data_path,
+#                                                      loader=ReadAsynetFile(),
+#                                                      extensions=(".npy",),
+#                                                      target_transform=target_transform)
+#     else:
+#         test_data_path = os.path.join(dir_name, 'testing')
+#         dataset = torchvision.datasets.DatasetFolder(root=test_data_path,
+#                                                      loader=ReadAsynetFile(),
+#                                                      extensions=(".npy",),
+#                                                      target_transform=target_transform)
+
+#     return dataset
+
 def load_ncaltech(train, dir_name, target_transform=None):
     if train:
         train_data_path = os.path.join(dir_name, 'training')
-        dataset = torchvision.datasets.DatasetFolder(root=train_data_path,
-                                                     loader=ReadAsynetFile(),
-                                                     extensions=(".npy",),
-                                                     target_transform=target_transform)
+        # EventSym (hierarchical) lives in: .../eventSym/training/main/sub/*.npy
+        if os.path.basename(dir_name).lower() == "eventsym":
+            dataset = HierarchicalNpyDataset(train_data_path)
+        else:
+            dataset = torchvision.datasets.DatasetFolder(
+                root=train_data_path,
+                loader=ReadAsynetFile(),
+                extensions=(".npy",),
+                target_transform=target_transform
+            )
     else:
         test_data_path = os.path.join(dir_name, 'testing')
-        dataset = torchvision.datasets.DatasetFolder(root=test_data_path,
-                                                     loader=ReadAsynetFile(),
-                                                     extensions=(".npy",),
-                                                     target_transform=target_transform)
-
+        if os.path.basename(dir_name).lower() == "eventsym":
+            dataset = HierarchicalNpyDataset(test_data_path)
+        else:
+            dataset = torchvision.datasets.DatasetFolder(
+                root=test_data_path,
+                loader=ReadAsynetFile(),
+                extensions=(".npy",),
+                target_transform=target_transform
+            )
     return dataset
+
 
 
 class ReadAsynetFile(object):
@@ -303,3 +314,61 @@ class ReadAsynetFile(object):
         data = torch.from_numpy(data)
 
         return data
+    
+import glob
+
+class HierarchicalNpyDataset(torch.utils.data.Dataset):
+    """
+    Expects:
+      root/
+        main_1/
+          sub_1/*.npy
+          sub_2/*.npy
+        main_2/
+          sub_3/*.npy
+          ...
+
+    Returns: x, y_sub, y_main
+    Also exposes mappings:
+      main_to_id, sub_to_id, sub_to_main (dict[int->int])
+    """
+    def __init__(self, root_dir, verbose=False):
+        self.root_dir = root_dir
+        self.samples = []  # list of (filepath, y_sub, y_main)
+
+        # Deterministic ordering
+        main_names = sorted([d for d in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, d))])
+        self.main_to_id = {m: i for i, m in enumerate(main_names)}
+
+        # Build subclass ids globally across all mains
+        sub_names_global = []
+        for m in main_names:
+            m_dir = os.path.join(root_dir, m)
+            sub_names = sorted([d for d in os.listdir(m_dir) if os.path.isdir(os.path.join(m_dir, d))])
+            for s in sub_names:
+                sub_names_global.append((m, s))
+
+        self.sub_to_id = { (m, s): i for i, (m, s) in enumerate(sub_names_global) }
+        self.sub_to_main = { self.sub_to_id[(m, s)]: self.main_to_id[m] for (m, s) in sub_names_global }
+
+        # Collect files
+        for (m, s) in sub_names_global:
+            y_main = self.main_to_id[m]
+            y_sub = self.sub_to_id[(m, s)]
+            sub_dir = os.path.join(root_dir, m, s)
+            for fp in sorted(glob.glob(os.path.join(sub_dir, "*.npy"))):
+                self.samples.append((fp, y_sub, y_main))
+
+        if verbose:
+            print(f" --> HierarchicalNpyDataset: {len(self.samples)} samples, "
+                  f"{len(self.main_to_id)} main classes, {len(self.sub_to_id)} subclasses")
+
+    def __len__(self):
+        return len(self.samples)
+
+    def __getitem__(self, idx):
+        fp, y_sub, y_main = self.samples[idx]
+        x = np.load(fp)
+        x = torch.from_numpy(x)
+        return x, int(y_sub), int(y_main)
+

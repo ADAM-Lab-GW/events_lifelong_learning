@@ -172,21 +172,41 @@ def train_cl(model, train_datasets, replay_mode="none", rnt=None, classes_per_ta
 
             #####-----CURRENT BATCH-----#####
             if not Offline_TaskIL:
-                x, y = next(data_loader)  # --> sample training data of current task
-                y = y  # --> ITL: adjust y-targets to 'active range'
-                x, y = x.to(device), y.to(device)  # --> transfer them to correct device
-                # y = y.expand(1) if len(y.size())==1 else y                 #--> hack for if batch-size is 1
+
+                batch = next(data_loader)  # could be (x,y) or (x,y_sub,y_main)
+
+                if isinstance(batch, (list, tuple)) and len(batch) == 3:
+                    x, y_sub, y_main = batch
+                    y = y_sub  # TEMP: keep old training behavior (train on subclasses)
+                else:
+                    x, y = batch
+                    y_main = None  # not available in flat case
+
+                # (optional) keep y_main around for future hierarchical-loss training
+                x, y = x.to(device), y.to(device)
+                if y_main is not None:
+                    y_main = y_main.to(device)
+
             else:
                 x = y = task_used = None  # --> all tasks are "treated as replay"
                 # -sample training data for all tasks so far, move to correct device and store in lists
                 x_, y_ = list(), list()
                 for task_id in range(task):
-                    x_temp, y_temp = next(data_loader[task_id])
+                                    
+                    batch_temp = next(data_loader[task_id])
+
+                    if isinstance(batch_temp, (list, tuple)) and len(batch_temp) == 3:
+                        x_temp, y_sub_temp, y_main_temp = batch_temp
+                        y_temp = y_sub_temp
+                    else:
+                        x_temp, y_temp = batch_temp
+
                     x_.append(x_temp.to(device))
-                    y_temp = y_temp - (classes_per_task * task_id)  # --> adjust y-targets to 'active range'
+                    y_temp = y_temp - (classes_per_task * task_id)  # adjust to active range
                     if batch_size_to_use == 1:
-                        y_temp = torch.tensor([y_temp])  # --> correct dimensions if batch-size is 1
+                        y_temp = torch.tensor([y_temp])
                     y_.append(y_temp.to(device))
+
 
             #####-----REPLAYED BATCH-----#####
             if not Offline_TaskIL and not Generative and not Current:
