@@ -370,5 +370,10 @@ class HierarchicalNpyDataset(torch.utils.data.Dataset):
         fp, y_sub, y_main = self.samples[idx]
         x = np.load(fp)
         x = torch.from_numpy(x)
+
+        x = torch.from_numpy(np.load(fp)).float()
+        if torch.isnan(x).any() or torch.isinf(x).any():
+            raise ValueError(f"NaN/Inf in input: {fp}")
+
         return x, int(y_sub), int(y_main)
 

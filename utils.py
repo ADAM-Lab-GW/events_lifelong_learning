@@ -28,9 +28,30 @@ def checkattr(args, attr):
 ## Data-handling functions ##
 #############################
 
+# def label_squeezing_collate_fn(batch):
+#     x, y = default_collate(batch)
+#     return x, y.long().squeeze()
+
+
 def label_squeezing_collate_fn(batch):
-    x, y = default_collate(batch)
-    return x, y.long().squeeze()
+    """
+    Supports samples of:
+      (x, y)                -> returns (x, y)
+      (x, y_sub, y_main)    -> returns (x, y_sub, y_main)
+    """
+    collated = default_collate(batch)
+
+    # flat case: (x, y)
+    if isinstance(collated, (list, tuple)) and len(collated) == 2:
+        x, y = collated
+        return x, y.long().squeeze()
+
+    # hierarchical case: (x, y_sub, y_main)
+    if isinstance(collated, (list, tuple)) and len(collated) == 3:
+        x, y_sub, y_main = collated
+        return x, y_sub.long().squeeze(), y_main.long().squeeze()
+
+    raise ValueError(f"Unexpected batch structure from default_collate: type={type(collated)}, len={len(collated)}")
 
 
 def get_data_loader(dataset, batch_size, cuda=False, collate_fn=label_squeezing_collate_fn, drop_last=False):

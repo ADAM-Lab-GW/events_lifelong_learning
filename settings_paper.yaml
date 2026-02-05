@@ -17,7 +17,7 @@ setup:
   scenario: 2  # [1, 2]
   seed: 20
   number_seeds: 1
-  tasks: 3
+  tasks: 2
   iterations: 200  # Each iteration includes data from the dataset of size 'batch_size'
   batch_size: 20
   gating_proportion_decoder: 0.6  # The fraction of neurons in a decor that are gated (activations are set to zero)

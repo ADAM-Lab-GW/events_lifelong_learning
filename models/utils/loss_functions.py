@@ -97,22 +97,58 @@ def log_Normal_standard(x, mean=0, average=False, dim=None):
         return torch.sum(log_normal, dim) if dim is not None else torch.sum(log_normal)
 
 
-def log_Normal_diag(x, mean, log_var, average=False, dim=None):
-    '''Calculate log-likelihood of sample [x] under Gaussian distribution(s) with mu=[mean], diag_var=exp[log_var].
-    NOTES: [dim]=-1    summing / averaging over all but the first dimension
-           [dim]=None  summing / averaging is done over all dimensions'''
+# def log_Normal_diag(x, mean, log_var, average=False, dim=None):
+#     '''Calculate log-likelihood of sample [x] under Gaussian distribution(s) with mu=[mean], diag_var=exp[log_var].
+#     NOTES: [dim]=-1    summing / averaging over all but the first dimension
+#            [dim]=None  summing / averaging is done over all dimensions'''
 
-    log_var[torch.isnan(log_var)] = torch.mean(log_var[~torch.isnan(log_var)])  # TODO: NaN handling
-    log_normal = -0.5 * (log_var + torch.pow(x - mean, 2) / torch.exp(log_var))
-    log_normal[torch.isnan(log_normal)] = torch.mean(log_normal[~torch.isnan(log_normal)])  # TODO: NaN handling
-    if torch.isnan(log_normal).any().item():
-        raise ValueError("NaN is encountered")
+#     log_var[torch.isnan(log_var)] = torch.mean(log_var[~torch.isnan(log_var)])  # TODO: NaN handling
+#     log_normal = -0.5 * (log_var + torch.pow(x - mean, 2) / torch.exp(log_var))
+#     log_normal[torch.isnan(log_normal)] = torch.mean(log_normal[~torch.isnan(log_normal)])  # TODO: NaN handling
+#     if torch.isnan(log_normal).any().item():
+#         raise ValueError("NaN is encountered")
+#     if dim is not None and dim == -1:
+#         log_normal = log_normal.view(log_normal.size(0), -1)
+#         dim = 1
+#     if average:
+#         return torch.mean(log_normal, dim) if dim is not None else torch.mean(log_normal)
+#     else:
+#         return torch.sum(log_normal, dim) if dim is not None else torch.sum(log_normal)
+def safe_sanitize(x, nan=0.0, clamp_min=-1e3, clamp_max=1e3):
+    # Replace NaNs (autograd-safe)
+    x = torch.where(torch.isnan(x), torch.full_like(x, nan), x)
+    # Clamp handles +/-inf and huge magnitudes (autograd-safe)
+    x = torch.clamp(x, min=clamp_min, max=clamp_max)
+    return x
+
+
+def log_Normal_diag(x, mean, log_var, average=False, dim=None):
+    """
+    Stable log N(x | mean, diag(exp(log_var))) compatible with older PyTorch autograd.
+    """
+
+    # sanitize inputs (avoid NaNs and extreme values)
+    x = safe_sanitize(x, nan=0.0, clamp_min=-1e3, clamp_max=1e3)
+    mean = safe_sanitize(mean, nan=0.0, clamp_min=-1e3, clamp_max=1e3)
+    log_var = safe_sanitize(log_var, nan=0.0, clamp_min=-20.0, clamp_max=20.0)
+
+    # clamp log-variance to prevent exp overflow / underflow
+    log_var = torch.clamp(log_var, min=-8.0, max=8.0)
+
+    # stable form: use exp(-log_var)
+    inv_var = torch.exp(-log_var)
+    diff2 = (x - mean).pow(2)
+
+    log_normal = -0.5 * (log_var + diff2 * inv_var)
+
+    # final sanitize
+    log_normal = safe_sanitize(log_normal, nan=0.0, clamp_min=-1e3, clamp_max=1e3)
+
     if dim is not None and dim == -1:
         log_normal = log_normal.view(log_normal.size(0), -1)
         dim = 1
+
     if average:
         return torch.mean(log_normal, dim) if dim is not None else torch.mean(log_normal)
     else:
         return torch.sum(log_normal, dim) if dim is not None else torch.sum(log_normal)
-
-##-------------------------------------------------------------------------------------------------------------------##

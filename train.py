@@ -279,6 +279,7 @@ def train_cl(model, train_datasets, replay_mode="none", rnt=None, classes_per_ta
             scores_ = scores_ if (model.replay_targets == "soft") else None
 
             # -----------------Train model(s)------------------#
+            
 
             # ---> Train MAIN MODEL
             if batch_index <= iters_main:

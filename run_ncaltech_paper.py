@@ -229,8 +229,8 @@ if __name__ == '__main__':
             dataset_name_suffix = "256"
         elif classes_tot == 101:
             dataset_name_suffix = "101"
-        elif classes_tot == 3:
-            dataset_name_suffix = "3"
+        elif classes_tot == 4:
+            dataset_name_suffix = "4"
         else:
             dataset_name = "N-MNIST"
             dataset_name_suffix = ""
@@ -430,8 +430,8 @@ if __name__ == '__main__':
             dataset_name_suffix = "256"
         elif classes_tot == 100:
             dataset_name_suffix = "101"
-        elif classes_tot == 3:
-            dataset_name_suffix = "3"
+        elif classes_tot == 4:
+            dataset_name_suffix = "4"
         else:
             dataset_name = "N-MNIST"
             dataset_name_suffix = ""
