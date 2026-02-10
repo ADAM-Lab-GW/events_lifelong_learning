@@ -21,6 +21,23 @@ from param_stamp import get_param_stamp_from_args
 from settings import Settings
 from visual import plt
 
+def count_subclasses_from_hierarchy(train_root):
+    # training/main/sub/*
+    n = 0
+    for main in os.listdir(train_root):
+        main_path = os.path.join(train_root, main)
+        if not os.path.isdir(main_path):
+            continue
+        for sub in os.listdir(main_path):
+            sub_path = os.path.join(main_path, sub)
+            if os.path.isdir(sub_path):
+                n += 1
+    return n
+
+def get_metric_from_seed(method_dict, seed, metric_key):
+    # method_dict[seed][0] is the stored precision_dict
+    return method_dict[seed][0][metric_key]
+
 
 ## Function for specifying input-options and organizing / checking them
 def handle_inputs():
@@ -188,13 +205,20 @@ if __name__ == '__main__':
         # ---------------------------#
         # ----- COLLECT RESULTS -----#
         # ---------------------------#
-
         prec = {}
         ave_prec = {}
+
+        # NEW: containers for main-class metrics
+        prec_main = {}
+        ave_prec_main = {}
 
         ## Create lists for all extracted <dicts> and <lists> with fixed order
         for seed in seed_list:
             i = 0
+
+            # -----------------------
+            # Subclass accuracies
+            # -----------------------
             prec[seed] = [
                 [0] * args.tasks if len(OFF) == 0 else OFF[seed][i]["average"],
                 [0] * args.tasks if len(NONE) == 0 else NONE[seed][i]["average"],
@@ -202,7 +226,23 @@ if __name__ == '__main__':
                 [0] * args.tasks if len(BIR) == 0 else BIR[seed][i]["average"],
                 [0] * args.tasks if len(BIRpH) == 0 else BIRpH[seed][i]["average"],
             ]
+
+            # -----------------------
+            # Main-class accuracies
+            # -----------------------
+            prec_main[seed] = [
+                [0] * args.tasks if len(OFF) == 0 else OFF[seed][i].get("average_main", [0] * args.tasks),
+                [0] * args.tasks if len(NONE) == 0 else NONE[seed][i].get("average_main", [0] * args.tasks),
+                [0] * args.tasks if len(GR) == 0 else GR[seed][i].get("average_main", [0] * args.tasks),
+                [0] * args.tasks if len(BIR) == 0 else BIR[seed][i].get("average_main", [0] * args.tasks),
+                [0] * args.tasks if len(BIRpH) == 0 else BIRpH[seed][i].get("average_main", [0] * args.tasks),
+            ]
+
             i = 1
+
+            # -----------------------
+            # Final (after all tasks)
+            # -----------------------
             ave_prec[seed] = [
                 [0] * args.tasks if len(OFF) == 0 else OFF[seed][i],
                 [0] * args.tasks if len(NONE) == 0 else NONE[seed][i],
@@ -210,6 +250,18 @@ if __name__ == '__main__':
                 [0] * args.tasks if len(BIR) == 0 else BIR[seed][i],
                 [0] * args.tasks if len(BIRpH) == 0 else BIRpH[seed][i],
             ]
+
+            # -----------------------
+            # Final main-class (after all tasks)
+            # -----------------------
+            ave_prec_main[seed] = [
+                0 if len(OFF) == 0 else OFF[seed][i + 1].get("average_main", 0),
+                0 if len(NONE) == 0 else NONE[seed][i + 1].get("average_main", 0),
+                0 if len(GR) == 0 else GR[seed][i + 1].get("average_main", 0),
+                0 if len(BIR) == 0 else BIR[seed][i + 1].get("average_main", 0),
+                0 if len(BIRpH) == 0 else BIRpH[seed][i + 1].get("average_main", 0),
+            ]
+
 
         # -------------------------------------------------------------------------------------------------#
 
@@ -234,17 +286,22 @@ if __name__ == '__main__':
         else:
             dataset_name = "N-MNIST"
             dataset_name_suffix = ""
-        title = "Incremental class learning on \n {}{}: {} episodes".format(dataset_name, dataset_name_suffix,
-                                                                            args.tasks)
-        ylabel_all = "Average precision (after all tasks)"
-        ylabel = "Average precision (on tasks seen so far)"
-        x_axes = BIRpH[args.seed][0]["x_task"]
+        train_root = os.path.join(args.d_dir, "eventSym", "training")
+        classes_tot = count_subclasses_from_hierarchy(train_root)
 
-        # select names / colors / ids
-        names = ["Batch", "None", "GR", "BIR", "BIR + H"]
-        colors = ["orange", "black", "blue", "red", "green"]
+        title = ""
+        ylabel_all_sub  = "Final average subclass accuracy (after all tasks)"
+        ylabel_all_main = "Final average main-class accuracy (after all tasks)"
+        ylabel_sub  = "Average subclass accuracy (tasks seen so far)"
+        ylabel_main = "Average main-class accuracy (tasks seen so far)"
+
+        x_axes = BIRpSI_7[args.seed][0]["x_task"]
+
+        names = ["Batch", "BIR", "BIR + H", "BIR + SI", "BIR + SI + H"]
+        colors = ["blue", "red", "green", "black", "orange"]
         markers = ["X", "d", "h", "s", "o"]
         ids = [0, 1, 2, 3, 4]
+
     else:
         ###----"BASELINES"----###
 
@@ -384,9 +441,17 @@ if __name__ == '__main__':
         prec = {}
         ave_prec = {}
 
+        # NEW
+        prec_main = {}
+        ave_prec_main = {}
+
         ## Create lists for all extracted <dicts> and <lists> with fixed order
         for seed in seed_list:
             i = 0
+
+            # -----------------------
+            # Subclass curves
+            # -----------------------
             prec[seed] = [
                 [0] * args.tasks if len(OFF) == 0 else OFF[seed][i]["average"],
                 [0] * args.tasks if len(BIR) == 0 else BIR[seed][i]["average"],
@@ -394,7 +459,23 @@ if __name__ == '__main__':
                 [0] * args.tasks if len(BIRpSI_7) == 0 else BIRpSI_7[seed][i]["average"],
                 [0] * args.tasks if len(BIRpSIpH_3_2) == 0 else BIRpSIpH_3_2[seed][i]["average"],
             ]
+
+            # -----------------------
+            # Main-class curves (NEW)
+            # -----------------------
+            prec_main[seed] = [
+                [0] * args.tasks if len(OFF) == 0 else OFF[seed][i].get("average_main", [0] * args.tasks),
+                [0] * args.tasks if len(BIR) == 0 else BIR[seed][i].get("average_main", [0] * args.tasks),
+                [0] * args.tasks if len(BIRpH_3_2) == 0 else BIRpH_3_2[seed][i].get("average_main", [0] * args.tasks),
+                [0] * args.tasks if len(BIRpSI_7) == 0 else BIRpSI_7[seed][i].get("average_main", [0] * args.tasks),
+                [0] * args.tasks if len(BIRpSIpH_3_2) == 0 else BIRpSIpH_3_2[seed][i].get("average_main", [0] * args.tasks),
+            ]
+
             i = 1
+
+            # -----------------------
+            # Final subclass accuracy (after all tasks)
+            # -----------------------
             ave_prec[seed] = [
                 [0] * args.tasks if len(OFF) == 0 else OFF[seed][i],
                 [0] * args.tasks if len(BIR) == 0 else BIR[seed][i],
@@ -402,6 +483,19 @@ if __name__ == '__main__':
                 [0] * args.tasks if len(BIRpSI_7) == 0 else BIRpSI_7[seed][i],
                 [0] * args.tasks if len(BIRpSIpH_3_2) == 0 else BIRpSIpH_3_2[seed][i],
             ]
+
+            # -----------------------
+            # Final main-class accuracy (NEW)
+            # Use last entry from "average_main" curve
+            # -----------------------
+            ave_prec_main[seed] = [
+                0 if len(OFF) == 0 else OFF[seed][0].get("average_main", [0])[-1],
+                0 if len(BIR) == 0 else BIR[seed][0].get("average_main", [0])[-1],
+                0 if len(BIRpH_3_2) == 0 else BIRpH_3_2[seed][0].get("average_main", [0])[-1],
+                0 if len(BIRpSI_7) == 0 else BIRpSI_7[seed][0].get("average_main", [0])[-1],
+                0 if len(BIRpSIpH_3_2) == 0 else BIRpSIpH_3_2[seed][0].get("average_main", [0])[-1],
+            ]
+
 
         # -------------------------------------------------------------------------------------------------#
 
@@ -435,75 +529,106 @@ if __name__ == '__main__':
         else:
             dataset_name = "N-MNIST"
             dataset_name_suffix = ""
-        # title = "Incremental class learning on \n {}{}: {} episodes".format(dataset_name, dataset_name_suffix,
-        #                                                                     args.tasks)
         title = ""
-        ylabel_all = "Average precision (after all tasks)"
-        ylabel = "Average precision (on tasks seen so far)"
+        ylabel_all_sub  = "Final average subclass accuracy (after all tasks)"
+        ylabel_all_main = "Final average main-class accuracy (after all tasks)"
+        ylabel_sub  = "Average subclass accuracy (tasks seen so far)"
+        ylabel_main = "Average main-class accuracy (tasks seen so far)"
+
         x_axes = BIRpSI_7[args.seed][0]["x_task"]
 
-        # select names / colors / ids
-        # names = ["Batch", "None", "SI", "GR", "BIR", "BIR + SI", "BIR + SI + Habituation"]
-        # colors = ["orange", "black", "pink", "blue", "red", "yellow", "green"]
-        # markers = ["X", "d", "*", "+", "h", "s", "v", "o"]
         names = ["Batch", "BIR", "BIR + H", "BIR + SI", "BIR + SI + H"]
         colors = ["blue", "red", "green", "black", "orange"]
         markers = ["X", "d", "h", "s", "o"]
-        # ids = [0, 1, 2, 3, 4, 5, 6]
         ids = [0, 1, 2, 3, 4]
 
-    # open pdf
+
+        # open pdf
     pp = plt.open_pdf("{}/{}.pdf".format(args.p_dir, plot_name))
     figure_list = []
 
-    # bar-plot
-    means = [np.mean([ave_prec[seed][id] for seed in seed_list]) for id in ids]
-    if args.n_seeds > 1:
-        sems = [np.sqrt(np.var([ave_prec[seed][id] for seed in seed_list]) / (len(seed_list) - 1)) for id in ids]
+    # ----------------------------#
+    # ----- BAR PLOTS (FINAL) ----#
+    # ----------------------------#
 
-    # print results to screen
-    print("\n\n" + "#" * 60 + "\nSUMMARY RESULTS: {}\n".format(title) + "-" * 60)
+    means_sub = [np.mean([ave_prec[seed][id] for seed in seed_list]) for id in ids]
+    means_main = [np.mean([ave_prec_main[seed][id] for seed in seed_list]) for id in ids]
+
+    if args.n_seeds > 1:
+        sems_sub = [np.sqrt(np.var([ave_prec[seed][id] for seed in seed_list]) / (len(seed_list) - 1)) for id in ids]
+        sems_main = [np.sqrt(np.var([ave_prec_main[seed][id] for seed in seed_list]) / (len(seed_list) - 1)) for id in ids]
+
+    print("\n\n" + "#" * 60 + "\nSUMMARY RESULTS (SUBCLASS): {}\n".format(title) + "-" * 60)
     for i, name in enumerate(names):
         if len(seed_list) > 1:
-            print("{:30s} {:5.2f}  (+/- {:4.2f}),  n={}".format(name, 100 * means[i], 100 * sems[i], len(seed_list)))
+            print("{:30s} {:5.2f}  (+/- {:4.2f}),  n={}".format(name, 100 * means_sub[i], 100 * sems_sub[i], len(seed_list)))
         else:
-            print("{:34s} {:5.2f}".format(name, 100 * means[i]))
+            print("{:34s} {:5.2f}".format(name, 100 * means_sub[i]))
     print("#" * 60)
 
-    # line-plot
-    ave_lines = []
-    sem_lines = []
-    for id in ids:
-        new_ave_line = []
-        new_sem_line = []
-        for line_id in range(len(prec[args.seed][id])):
-            all_entries = [prec[seed][id][line_id] for seed in seed_list]
-            new_ave_line.append(np.mean(all_entries))
-            if args.n_seeds > 1:
-                new_sem_line.append(np.sqrt(np.var(all_entries) / (len(all_entries) - 1)))
-        ave_lines.append(new_ave_line)
-        sem_lines.append(new_sem_line)
-    # ylim = (0.0, 0.9)
-    ylim = (0.4, 1.0)
-    class_per_task = int(get_output_classes_number(args.experiment) / args.tasks)
-    figure = plt.plot_lines(ave_lines, x_axes=[class_per_task * i for i in x_axes],
-                            line_names=names, colors=colors, title=title,
-                            xlabel="Number of classes learned",
-                            ylabel="Test accuracy",
-                            list_with_errors=sem_lines if args.n_seeds > 1 else None, ylim=ylim, markers=markers,
-                            font_scale=font_scale, chance_line=False)
-    figure_list.append(figure)
+    print("\n\n" + "#" * 60 + "\nSUMMARY RESULTS (MAIN): {}\n".format(title) + "-" * 60)
+    for i, name in enumerate(names):
+        if len(seed_list) > 1:
+            print("{:30s} {:5.2f}  (+/- {:4.2f}),  n={}".format(name, 100 * means_main[i], 100 * sems_main[i], len(seed_list)))
+        else:
+            print("{:34s} {:5.2f}".format(name, 100 * means_main[i]))
+    print("#" * 60)
 
-    # add figures to pdf
+    # (Optional) if you already have a bar plotting helper, call it twice.
+    # Otherwise skip bars and rely on printed summary.
+
+    # ----------------------------#
+    # ----- LINE PLOTS (CL)  -----#
+    # ----------------------------#
+
+    def build_lines(metric_store):
+        ave_lines = []
+        sem_lines = []
+        for id in ids:
+            new_ave_line = []
+            new_sem_line = []
+            for line_id in range(len(metric_store[args.seed][id])):
+                all_entries = [metric_store[seed][id][line_id] for seed in seed_list]
+                new_ave_line.append(np.mean(all_entries))
+                if args.n_seeds > 1:
+                    new_sem_line.append(np.sqrt(np.var(all_entries) / (len(all_entries) - 1)))
+            ave_lines.append(new_ave_line)
+            sem_lines.append(new_sem_line)
+        return ave_lines, sem_lines
+
+    # x-axis: number of subclasses learned
+    class_per_task = int(classes_tot / args.tasks)
+
+    # --- Subclass lines
+    ave_lines_sub, sem_lines_sub = build_lines(prec)
+    figure_sub = plt.plot_lines(
+        ave_lines_sub, x_axes=[class_per_task * i for i in x_axes],
+        line_names=names, colors=colors, title=title,
+        xlabel="Number of subclasses learned",
+        ylabel="Subclass accuracy",
+        list_with_errors=sem_lines_sub if args.n_seeds > 1 else None,
+        ylim=(0.0, 1.0), markers=markers, font_scale=font_scale, chance_line=False
+    )
+    figure_list.append(figure_sub)
+
+    # --- Main-class lines
+    ave_lines_main, sem_lines_main = build_lines(prec_main)
+    figure_main = plt.plot_lines(
+        ave_lines_main, x_axes=[class_per_task * i for i in x_axes],
+        line_names=names, colors=colors, title=title,
+        xlabel="Number of main classes learned",
+        ylabel="Main-class accuracy",
+        list_with_errors=sem_lines_main if args.n_seeds > 1 else None,
+        ylim=(0.0, 1.0), markers=markers, font_scale=font_scale, chance_line=False
+    )
+    figure_list.append(figure_main)
+
+    # save figures
     for figure in figure_list:
         pp.savefig(figure, bbox_inches="tight")
-
-    # close the pdf
     pp.close()
 
-    # Print name of generated plot on screen
     print("\nGenerated plot: {}/{}.pdf\n".format(args.p_dir, plot_name))
-
 # -------------------------- plot decay rates and top neurons for BIRpH -------------------- #
     if args.scenario == 2:
 
