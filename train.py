@@ -284,12 +284,13 @@ def train_cl(model, train_datasets, replay_mode="none", rnt=None, classes_per_ta
             # ---> Train MAIN MODEL
             if batch_index <= iters_main:
 
+                loss_dict = model.train_a_batch(x, y=y, y_main=y_main,x_=x_, y_=y_, scores_=scores_,tasks_=task_used, active_classes=active_classes, task=task, rnt=(1. if task == 1 else 1. / task) if rnt is None else rnt,replay_not_hidden=False if Generative else True)
                 # Train the main model with this batch
-                loss_dict = model.train_a_batch(x, y=y, x_=x_, y_=y_, scores_=scores_,
-                                                tasks_=task_used, active_classes=active_classes, task=task, rnt=(
-                        1. if task == 1 else 1. / task
-                    ) if rnt is None else rnt,
-                                                replay_not_hidden=False if Generative else True)
+                # loss_dict = model.train_a_batch(x, y=y, x_=x_, y_=y_, scores_=scores_,
+                #                                 tasks_=task_used, active_classes=active_classes, task=task, rnt=(
+                #         1. if task == 1 else 1. / task
+                #     ) if rnt is None else rnt,
+                #                                 replay_not_hidden=False if Generative else True)
 
                 # Update running parameter importance estimates in W
                 if isinstance(model, ContinualLearner) and model.si_c > 0:
@@ -324,7 +325,7 @@ def train_cl(model, train_datasets, replay_mode="none", rnt=None, classes_per_ta
             # ---> Train GENERATOR
             if generator is not None and batch_index <= iters_gen:
 
-                loss_dict = generator.train_a_batch(x, y=y, x_=x_, y_=y_, scores_=scores_,
+                loss_dict = generator.train_a_batch(x, y=y, y_main=y_main, x_=x_, y_=y_, scores_=scores_,
                                                     tasks_=task_used, active_classes=active_classes, rnt=(
                         1. if task == 1 else 1. / task
                     ) if rnt is None else rnt, task=task,
