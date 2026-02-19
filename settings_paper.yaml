@@ -17,9 +17,9 @@ setup:
   scenario: 2  # [1, 2]
   seed: 20
   number_seeds: 1
-  tasks: 3
+  tasks: 10
   iterations: 200  # Each iteration includes data from the dataset of size 'batch_size'
-  batch_size: 20
+  batch_size: 1
   gating_proportion_decoder: 0.6  # The fraction of neurons in a decor that are gated (activations are set to zero)
   z_dimension: 4096  # The size of the latent variable representation (VAE)
   batch_normalization: true  # batch normalization for fully connected layers

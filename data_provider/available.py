@@ -43,5 +43,5 @@ DATASET_CONFIGS = {
     'ncaltech256': {'size': 40, 'channels': 1, 'classes': 257},  # TODO
     'ncaltech101': {'size': 40, 'channels': 1, 'classes': 101},  # TODO
     'nmnist': {'size': 34, 'channels': 1, 'classes': 10},  # TODO
-    'eventsym': {'size': 50, 'channels': 1, 'classes': 3},  # TODO
+    'eventsym': {'size': 50, 'channels': 1, 'classes': 10},  # TODO
 }

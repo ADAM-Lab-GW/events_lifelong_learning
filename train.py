@@ -172,10 +172,11 @@ def train_cl(model, train_datasets, replay_mode="none", rnt=None, classes_per_ta
 
             #####-----CURRENT BATCH-----#####
             if not Offline_TaskIL:
-                x, y = next(data_loader)  # --> sample training data of current task
-                y = y  # --> ITL: adjust y-targets to 'active range'
-                x, y = x.to(device), y.to(device)  # --> transfer them to correct device
-                # y = y.expand(1) if len(y.size())==1 else y                 #--> hack for if batch-size is 1
+                x, y = next(data_loader)
+
+                # make labels consistently [B]
+                y = y.view(-1).long()          # <- key line (works for scalar and for [B])
+                x, y = x.to(device), y.to(device)
             else:
                 x = y = task_used = None  # --> all tasks are "treated as replay"
                 # -sample training data for all tasks so far, move to correct device and store in lists
@@ -184,8 +185,8 @@ def train_cl(model, train_datasets, replay_mode="none", rnt=None, classes_per_ta
                     x_temp, y_temp = next(data_loader[task_id])
                     x_.append(x_temp.to(device))
                     y_temp = y_temp - (classes_per_task * task_id)  # --> adjust y-targets to 'active range'
-                    if batch_size_to_use == 1:
-                        y_temp = torch.tensor([y_temp])  # --> correct dimensions if batch-size is 1
+                    y_temp = y_temp.view(-1).long()
+
                     y_.append(y_temp.to(device))
 
             #####-----REPLAYED BATCH-----#####
@@ -233,6 +234,9 @@ def train_cl(model, train_datasets, replay_mode="none", rnt=None, classes_per_ta
                             task - 1))]  # -> when scenario=="class", zero probs will be added in [loss_fn_kd]-function
                     # -also get the 'hard target'
                     _, y_ = torch.max(scores_, dim=1)
+                    if y_ is not None and torch.is_tensor(y_):
+                        y_ = y_.view(-1).long()
+
                 else:
                     # -[x_] needs to be evaluated according to each previous task, so make list with entry per task
                     scores_ = list()

@@ -242,7 +242,15 @@ class AutoEncoder(ContinualLearner):
         OUTPUT: - [image_recon]  <4D-tensor>'''
 
         # -if needed, convert [gate_input] to one-hot vector
-        if self.dg_gates and (gate_input is not None) and (type(gate_input) == np.ndarray or gate_input.dim() < 2):
+        if self.dg_gates and (type(gate_input) == np.ndarray or gate_input.dim() < 2):
+            if gate_input is not None:
+                if not torch.is_tensor(gate_input):
+                    gate_input = torch.tensor(gate_input, device=self._device())
+                if gate_input.dim() == 0:
+                    gate_input = gate_input.expand(z.size(0))
+                gate_input = gate_input.long()
+
+    
             gate_input = lf.to_one_hot(gate_input, classes=self.gate_size, device=self._device())
 
         # -put inputs through decoder

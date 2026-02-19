@@ -10,7 +10,7 @@ NCALTECH12_OUTPUT_CLASSES_NUMBER = 12
 NCALTECH256_OUTPUT_CLASSES_NUMBER = 257
 NCALTECH101_OUTPUT_CLASSES_NUMBER = 101
 NMNIST_OUTPUT_CLASSES_NUMBER = 10   
-EVENTSYM_OUTPUT_CLASSES_NUMBER = 3  # Assuming eventSym has 3 classes; adjust as necessary.
+EVENTSYM_OUTPUT_CLASSES_NUMBER = 10  # Assuming eventSym has 3 classes; adjust as necessary.
 
 
 class DatasetNames(Enum):

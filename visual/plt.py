@@ -99,36 +99,25 @@ def plot_lines(list_with_lines, x_axes=None, line_names=None, colors=None, title
     :return: f:             <figure>
     '''
 
-    # if needed, generate default x-axis
     # if needed, generate default x-axis (also handle empty)
     if x_axes is None or len(x_axes) == 0:
         n_obs = len(list_with_lines[0]) if len(list_with_lines) > 0 else 0
         x_axes = list(range(1, n_obs + 1))  # start at 1 to avoid divide-by-zero later
 
-
     # if needed, generate default line-names
-    if line_names == None:
+    if line_names is None:
         n_lines = len(list_with_lines)
         line_names = ["line " + str(line_id) for line_id in range(n_lines)]
 
     # make plot
     size = (15, 6) if figsize is None else figsize
     f, axarr = plt.subplots(1, 1, figsize=size)
-    # ---- robust ticks ----
-    x_min = int(min(x_axes))
-    x_max = int(max(x_axes))
 
-    # choose a reasonable step (avoid 0)
-    if len(x_axes) <= 10:
-        step = 1
-    else:
-        step = max(1, int((x_max - x_min) / 10))
+    # ---- MINIMAL CHANGE: don't force custom tick positions/labels (can clip ranges) ----
+    axarr.tick_params(axis='x', labelsize=16 * font_scale)
+    axarr.tick_params(axis='y', labelsize=16 * font_scale)
 
-    ticks = np.arange(x_min, x_max + 1, step)
-    axarr.xaxis.set_ticks(ticks)
-    axarr.set_xticklabels(ticks, rotation=0, fontsize=16 * font_scale)
-
-
+    # secondary x-axis (kept the same behavior)
     def transform(x):
         return x / 2  # 2 for long horizon (5) (2)
 
@@ -137,108 +126,161 @@ def plot_lines(list_with_lines, x_axes=None, line_names=None, colors=None, title
 
     secax = axarr.secondary_xaxis('top', functions=(transform, reverse))
     secax.set_xlabel("Number of episodes", fontsize=20 * font_scale, labelpad=14)
-    # secax.set_ticks(list(range(1, 51)))  # for long horizon
-    # secondary x-axis ticks: match count but keep readable
+
+    # Keep your secondary ticks logic, but make it robust to non-int x_axes
+    try:
+        x_max = int(max(x_axes)) if len(x_axes) > 0 else 0
+    except Exception:
+        x_max = 0
     sec_ticks = list(range(1, min(6, x_max + 1)))
     secax.set_ticks(sec_ticks)
-  # for short horizon
-    # secax.set_ticks(list(range(1, 21)))
 
-    n = 1  # Keeps every nth label  (5 for long horizon) (1 for short horizon)
-    [l.set_visible(False) for (i, l) in enumerate(axarr.xaxis.get_ticklabels()) if (i % n != 0 and i != 49)]
-    for tick in axarr.yaxis.get_major_ticks():
-        tick.label.set_fontsize(16*font_scale)
-
-    [l.set_visible(False) for (i, l) in enumerate(secax.xaxis.get_ticklabels()) if (i % n != 0 and i != 49)]
+    # Ensure secondary tick font sizes match
     for tick in secax.xaxis.get_major_ticks():
-        tick.label.set_size(16*font_scale)
+        tick.label.set_size(16 * font_scale)
         tick.label1.set_size(16 * font_scale)
         tick.label2.set_size(16 * font_scale)
 
-        # add error-lines / shaded areas
+    # ---- error-lines / shaded areas ----
     if list_with_errors is not None:
         for task_id, name in enumerate(line_names):
             if errors == "shaded":
-                axarr.fill_between(x_axes, list(np.array(list_with_lines[task_id]) + np.array(list_with_errors[task_id])),
-                                   list(np.array(list_with_lines[task_id]) - np.array(list_with_errors[task_id])),
-                                   color=None if (colors is None) else colors[task_id], alpha=0.25)
+                axarr.fill_between(
+                    x_axes,
+                    list(np.array(list_with_lines[task_id]) + np.array(list_with_errors[task_id])),
+                    list(np.array(list_with_lines[task_id]) - np.array(list_with_errors[task_id])),
+                    color=None if (colors is None) else colors[task_id],
+                    alpha=0.25
+                )
             else:
-                axarr.plot(x_axes, list(np.array(list_with_lines[task_id]) + np.array(list_with_errors[task_id])), label=None,
-                           color=None if (colors is None) else colors[task_id], linewidth=1, linestyle='dashed')
-                axarr.plot(x_axes, list(np.array(list_with_lines[task_id]) - np.array(list_with_errors[task_id])), label=None,
-                           color=None if (colors is None) else colors[task_id], linewidth=1, linestyle='dashed')
+                axarr.plot(
+                    x_axes,
+                    list(np.array(list_with_lines[task_id]) + np.array(list_with_errors[task_id])),
+                    label=None,
+                    color=None if (colors is None) else colors[task_id],
+                    linewidth=1,
+                    linestyle='dashed'
+                )
+                axarr.plot(
+                    x_axes,
+                    list(np.array(list_with_lines[task_id]) - np.array(list_with_errors[task_id])),
+                    label=None,
+                    color=None if (colors is None) else colors[task_id],
+                    linewidth=1,
+                    linestyle='dashed'
+                )
 
-    # mean lines
+    # ---- mean lines ----
     for task_id, name in enumerate(line_names):
-        axarr.plot(x_axes, list_with_lines[task_id], label=name,
-                   color=colors[task_id],
-                   linewidth=1, marker=markers[task_id] if with_dots else None, linestyle=linestyle if type(linestyle)==str else linestyle[task_id])
+        axarr.plot(
+            x_axes,
+            list_with_lines[task_id],
+            label=name,
+            color=colors[task_id] if colors is not None else None,
+            linewidth=1,
+            marker=markers[task_id] if (with_dots and markers is not None) else (None if not with_dots else None),
+            linestyle=linestyle if isinstance(linestyle, str) else linestyle[task_id]
+        )
 
-    # Chance line:
+    # ---- chance line ----
     # Chance line: for class-incremental accuracy ~ 1 / (#classes seen so far)
     if chance_line:
-        # if x_axes represent "#classes seen", use that directly
         denom = np.array(x_axes, dtype=np.float32)
         denom = np.clip(denom, 1.0, None)
         values = 1.0 / denom
         axarr.plot(x_axes, values, label="Chance", color="grey")
 
-
-    # add horizontal line
+    # ---- horizontal line ----
     if h_line is not None:
         axarr.axhline(y=h_line, label=h_label, color="grey")
         if h_error is not None:
             if errors == "shaded":
-                axarr.fill_between([x_axes[0], x_axes[-1]],
-                                   [h_line + h_error, h_line + h_error], [h_line - h_error, h_line - h_error],
-                                   color="grey", alpha=0.25)
+                axarr.fill_between(
+                    [x_axes[0], x_axes[-1]],
+                    [h_line + h_error, h_line + h_error],
+                    [h_line - h_error, h_line - h_error],
+                    color="grey",
+                    alpha=0.25
+                )
             else:
                 axarr.axhline(y=h_line + h_error, label=None, color="grey", linewidth=1, linestyle='dashed')
                 axarr.axhline(y=h_line - h_error, label=None, color="grey", linewidth=1, linestyle='dashed')
 
-    # add horizontal lines
+    # ---- multiple horizontal lines ----
     if h_lines is not None:
         h_colors = colors if h_colors is None else h_colors
         for task_id, new_h_line in enumerate(h_lines):
-            axarr.axhline(y=new_h_line, label=None if h_labels is None else h_labels[task_id],
-                          color=None if (h_colors is None) else h_colors[task_id])
+            axarr.axhline(
+                y=new_h_line,
+                label=None if h_labels is None else h_labels[task_id],
+                color=None if (h_colors is None) else h_colors[task_id]
+            )
             if h_errors is not None:
                 if errors == "shaded":
-                    axarr.fill_between([x_axes[0], x_axes[-1]],
-                                       [new_h_line + h_errors[task_id], new_h_line+h_errors[task_id]],
-                                       [new_h_line - h_errors[task_id], new_h_line - h_errors[task_id]],
-                                       color=None if (h_colors is None) else h_colors[task_id], alpha=0.25)
+                    axarr.fill_between(
+                        [x_axes[0], x_axes[-1]],
+                        [new_h_line + h_errors[task_id], new_h_line + h_errors[task_id]],
+                        [new_h_line - h_errors[task_id], new_h_line - h_errors[task_id]],
+                        color=None if (h_colors is None) else h_colors[task_id],
+                        alpha=0.25
+                    )
                 else:
-                    axarr.axhline(y=new_h_line+h_errors[task_id], label=None,
-                                  color=None if (h_colors is None) else h_colors[task_id], linewidth=1,
-                                  linestyle='dashed')
-                    axarr.axhline(y=new_h_line-h_errors[task_id], label=None,
-                                  color=None if (h_colors is None) else h_colors[task_id], linewidth=1,
-                                  linestyle='dashed')
+                    axarr.axhline(
+                        y=new_h_line + h_errors[task_id],
+                        label=None,
+                        color=None if (h_colors is None) else h_colors[task_id],
+                        linewidth=1,
+                        linestyle='dashed'
+                    )
+                    axarr.axhline(
+                        y=new_h_line - h_errors[task_id],
+                        label=None,
+                        color=None if (h_colors is None) else h_colors[task_id],
+                        linewidth=1,
+                        linestyle='dashed'
+                    )
 
-    # finish layout
-    # -set y-axis
+    # ---- finish layout / limits ----
+    # y-axis full 0..100 by default (you asked for this)
     if ylim is not None:
         axarr.set_ylim(ylim)
+    else:
+        axarr.set_ylim((0, 100))
+
+    # x-axis: ensure full span is visible (depending on #classes)
+    # - if xlim provided, respect it
     if xlim is not None:
         axarr.set_xlim(xlim)
-    # -add axis-labels
+    else:
+        # expand to include full x range exactly
+        if len(x_axes) > 0:
+            axarr.set_xlim(min(x_axes), max(x_axes))
+
+    # axis labels
     if xlabel is not None:
-        axarr.set_xlabel(xlabel, fontsize=20*font_scale)
+        axarr.set_xlabel(xlabel, fontsize=20 * font_scale)
     if ylabel is not None:
-        axarr.set_ylabel(ylabel, fontsize=20*font_scale)
-    # -add title(s)
+        axarr.set_ylabel(ylabel, fontsize=20 * font_scale)
+
+    # title(s)
     if title is not None:
-        axarr.set_title(title, fontsize=20*font_scale)
+        axarr.set_title(title, fontsize=20 * font_scale)
     if title_top is not None:
         f.suptitle(title_top)
-    # -add legend
+
+    # legend
     if line_names is not None:
-        axarr.legend(fontsize=15*font_scale, ncol=2)
-    # -set x-axis to log-scale
+        axarr.legend(fontsize=15 * font_scale, ncol=2)
+
+    # x-axis log-scale
     if x_log:
         axarr.set_xscale('log')
-    # return the figure
+
+    # ---- MINIMAL CHANGE: ensure nothing is clipped ----
+    axarr.relim()
+    axarr.autoscale(enable=True, axis='both', tight=False)
+    f.tight_layout()
+
     return f
 
 
