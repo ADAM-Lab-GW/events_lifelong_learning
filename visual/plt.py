@@ -124,8 +124,8 @@ def plot_lines(list_with_lines, x_axes=None, line_names=None, colors=None, title
     def reverse(x):
         return x * 2  # 2 for long horizon (5) (2)
 
-    secax = axarr.secondary_xaxis('top', functions=(transform, reverse))
-    secax.set_xlabel("Number of episodes", fontsize=20 * font_scale, labelpad=14)
+    # secax = axarr.secondary_xaxis('top', functions=(transform, reverse))
+    # secax.set_xlabel("Number of episodes", fontsize=20 * font_scale, labelpad=14)
 
     # Keep your secondary ticks logic, but make it robust to non-int x_axes
     try:
@@ -133,13 +133,13 @@ def plot_lines(list_with_lines, x_axes=None, line_names=None, colors=None, title
     except Exception:
         x_max = 0
     sec_ticks = list(range(1, min(6, x_max + 1)))
-    secax.set_ticks(sec_ticks)
+    # secax.set_ticks(sec_ticks)
 
     # Ensure secondary tick font sizes match
-    for tick in secax.xaxis.get_major_ticks():
-        tick.label.set_size(16 * font_scale)
-        tick.label1.set_size(16 * font_scale)
-        tick.label2.set_size(16 * font_scale)
+    # for tick in secax.xaxis.get_major_ticks():
+    #     tick.label.set_size(16 * font_scale)
+    #     tick.label1.set_size(16 * font_scale)
+    #     tick.label2.set_size(16 * font_scale)
 
     # ---- error-lines / shaded areas ----
     if list_with_errors is not None:
@@ -242,10 +242,8 @@ def plot_lines(list_with_lines, x_axes=None, line_names=None, colors=None, title
 
     # ---- finish layout / limits ----
     # y-axis full 0..100 by default (you asked for this)
-    if ylim is not None:
-        axarr.set_ylim(ylim)
-    else:
-        axarr.set_ylim((0, 100))
+
+    axarr.set_ylim((-1, 101.0))
 
     # x-axis: ensure full span is visible (depending on #classes)
     # - if xlim provided, respect it
@@ -277,9 +275,9 @@ def plot_lines(list_with_lines, x_axes=None, line_names=None, colors=None, title
         axarr.set_xscale('log')
 
     # ---- MINIMAL CHANGE: ensure nothing is clipped ----
-    axarr.relim()
-    axarr.autoscale(enable=True, axis='both', tight=False)
-    f.tight_layout()
+    # axarr.relim()
+    # axarr.autoscale(enable=True, axis='both', tight=False)
+    # f.tight_layout()
 
     return f
 

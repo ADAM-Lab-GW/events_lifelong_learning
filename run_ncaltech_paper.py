@@ -477,20 +477,20 @@ if __name__ == '__main__':
         new_ave_line = []
         new_sem_line = []
         for line_id in range(len(prec[args.seed][id])):
-            all_entries = [prec[seed][id][line_id] for seed in seed_list]
+            all_entries = [prec[seed][id][line_id]*100 for seed in seed_list]
             new_ave_line.append(np.mean(all_entries))
             if args.n_seeds > 1:
                 new_sem_line.append(np.sqrt(np.var(all_entries) / (len(all_entries) - 1)))
         ave_lines.append(new_ave_line)
         sem_lines.append(new_sem_line)
     # ylim = (0.0, 0.9)
-    ylim = (0.4, 1.0)
+    ylim = (0.0, 100.0)
     class_per_task = int(get_output_classes_number(args.experiment) / args.tasks)
     figure = plt.plot_lines(ave_lines, x_axes=[class_per_task * i for i in x_axes],
                             line_names=names, colors=colors, title=title,
-                            xlabel="Number of classes learned",
+                            xlabel="Number of classes learned",ylim = ylim,
                             ylabel="Test accuracy",
-                            list_with_errors=sem_lines if args.n_seeds > 1 else None, ylim=ylim, markers=markers,
+                            list_with_errors=sem_lines if args.n_seeds > 1 else None, markers=markers,
                             font_scale=font_scale, chance_line=False)
     figure_list.append(figure)
 
@@ -625,22 +625,22 @@ if __name__ == '__main__':
             if line_id < 10 and len(prec[args.seed][id]) > 10:
                 continue
 
-            all_entries = [prec[seed][id][line_id] for seed in seed_list]
+            all_entries = [prec[seed][id][line_id]*100 for seed in seed_list]
             new_ave_line.append(np.mean(all_entries))
             if args.n_seeds > 1:
                 new_sem_line.append(np.sqrt(np.var(all_entries) / (len(all_entries) - 1)))
         ave_lines.append(new_ave_line)
         sem_lines.append(new_sem_line)
-    ylim = (0.075, 0.225)
-    #ylim = (0.0, 1.0)
+    # ylim = (0.075, 0.225)
+    ylim = (0.0, 100.0)   
     xlim = None
     class_per_task = int(get_output_classes_number(args.experiment) / args.tasks)
     
     figure = plt.plot_lines(ave_lines, x_axes=[class_per_task * i for i in x_axes],#[10:]],
-                            line_names=names, colors=colors, title=title,
+                            line_names=names, colors=colors, title=title, ylim=ylim,
                             xlabel="Number of classes learned",
                             ylabel="Test accuracy",
-                            list_with_errors=sem_lines if args.n_seeds > 1 else None, ylim=ylim, markers=markers,
+                            list_with_errors=sem_lines if args.n_seeds > 1 else None, markers=markers,
                             font_scale=font_scale, xlim=xlim, chance_line=False)
     figure_list.append(figure)
 
@@ -755,21 +755,21 @@ if __name__ == '__main__':
             # continue
             if line_id < 10 and len(prec[args.seed][id]) > 10:
                 continue
-            all_entries = [prec[seed][id][line_id] for seed in seed_list]
+            all_entries = [prec[seed][id][line_id]*100 for seed in seed_list]
             new_ave_line.append(np.mean(all_entries))
             if args.n_seeds > 1:
                 new_sem_line.append(np.sqrt(np.var(all_entries) / (len(all_entries) - 1)))
         ave_lines.append(new_ave_line)
         sem_lines.append(new_sem_line)
-    ylim = (0.075, 0.225)
-    #ylim = (0.0, 1.0)
+    # ylim = (0.075, 0.225)
+    ylim = (0.0, 100.0)
     xlim = None
     class_per_task = int(get_output_classes_number(args.experiment) / args.tasks)
     figure = plt.plot_lines(ave_lines, x_axes=[class_per_task * i for i in x_axes],#[10:]],
                             line_names=names, colors=colors, title=title,
-                            xlabel="Number of classes learned",
+                            xlabel="Number of classes learned", ylim = ylim,
                             ylabel="Test accuracy",
-                            list_with_errors=sem_lines if args.n_seeds > 1 else None, ylim=ylim, markers=markers,
+                            list_with_errors=sem_lines if args.n_seeds > 1 else None, markers=markers,
                             font_scale=font_scale, xlim=xlim, chance_line=False)
     figure_list.append(figure)
 
