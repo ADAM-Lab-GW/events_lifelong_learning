@@ -15,7 +15,7 @@ def get_param_stamp_from_args(args):
 
     # -get configurations of experiment
     config = get_data_incremental_strategy(
-        name=args.experiment, tasks=args.tasks, data_dir=args.d_dir, only_config=True,
+        name=args.dataset, tasks=args.tasks, data_dir=args.d_dir, only_config=True,
         verbose=False,
     )
 
@@ -45,7 +45,7 @@ def get_param_stamp(args, model_name, verbose=True, replay=False, replay_model_n
         n=args.tasks, of="OL" if checkattr(args, 'only_last') else ""
     ) if hasattr(args, "tasks") else ""
     task_stamp = "{exp}{multi_n}".format(
-        exp=args.experiment,
+        exp=args.dataset,
         multi_n=multi_n_stamp
     )
     if verbose:

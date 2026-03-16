@@ -82,7 +82,7 @@ def run(args, verbose=False):
     if verbose:
         print("\nPreparing the data...")
     (train_datasets, test_datasets), config, classes_per_task = get_data_incremental_strategy(
-        name=args.experiment, tasks=args.tasks, data_dir=args.d_dir,
+        name=args.dataset, tasks=args.tasks, data_dir=args.d_dir,
         verbose=verbose, only_test=(not args.train)
     )
 

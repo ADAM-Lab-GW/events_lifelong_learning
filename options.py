@@ -57,7 +57,7 @@ def add_task_options(parser):
     task_params = parser.add_argument_group('Task Parameters')
     tasks = ['NCALTECH12', 'NCALTECH256', 'NCALTECH101', 'NMNIST', 'eventSym']
     task_default = 'eventSym'
-    task_params.add_argument('--experiment', type=str, default=task_default, choices=tasks)
+    task_params.add_argument('--dataset', type=str, default=task_default, choices=tasks)
     task_params.add_argument('--tasks', type=int, help='number of tasks')
 
     return parser
@@ -152,11 +152,11 @@ def add_allocation_options(parser):
 def set_defaults(args):
     # -if 'brain-inspired' is selected, select corresponding defaults
     args.recon_loss = "MSE"
-    args.dg_type = ("task" if args.experiment == 'permMNIST' else "class") if args.dg_type is None else args.dg_type
-    args.tasks = (6 if args.experiment == 'NCALTECH12' else 64) if args.tasks is None else args.tasks
-    args.iters = (100 if args.experiment == 'NCALTECH12' else 100) if args.iters is None else args.iters
+    args.dg_type = ("task" if args.dataset == 'permMNIST' else "class") if args.dg_type is None else args.dg_type
+    args.tasks = (6 if args.dataset == 'NCALTECH12' else 64) if args.tasks is None else args.tasks
+    args.iters = (100 if args.dataset == 'NCALTECH12' else 100) if args.iters is None else args.iters
     args.lr = 0.0001 if args.lr is None else args.lr
-    args.batch = (64 if args.experiment == 'NCALTECH12' else 256) if args.batch is None else args.batch
+    args.batch = (64 if args.dataset == 'NCALTECH12' else 256) if args.batch is None else args.batch
     args.fc_units = 2000 if args.fc_units is None else args.fc_units
 
     args.si_c = 1. if args.si_c is None else args.si_c
