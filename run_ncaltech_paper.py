@@ -44,9 +44,12 @@ def handle_inputs():
     settings_filepath = args.settings_file
     settings = Settings(settings_filepath)
 
+    args.r_dir = args.r_dir + "/{}".format(settings.experiment)
+    args.p_dir = args.p_dir + "/{}".format(settings.experiment)
     args.seed = settings.seed
     args.n_seeds = settings.number_seeds
-    args.experiment = settings.dataset_name
+    args.dataset = settings.dataset_name
+    args.experiment = settings.experiment
     args.tasks = settings.tasks
     args.iters = settings.iterations
     args.batch = settings.batch_size
@@ -219,8 +222,8 @@ if __name__ == '__main__':
 
         # name for plot
         plot_name = "summary_{}-tasks_{}-iters_{}-lr_{}-c_{}-prop_{}-z_{}".format(
-            args.experiment, args.tasks, args.iters, args.lr, args.dg_c, args.dg_si_prop, args.z_dim)
-        classes_tot = int(re.search(r'\d+', args.experiment).group())
+            args.dataset, args.tasks, args.iters, args.lr, args.dg_c, args.dg_si_prop, args.z_dim)
+        classes_tot = int(re.search(r'\d+', args.dataset).group())
         dataset_name = "eventSym"
         dataset_name_suffix = ""
         if classes_tot == 12:
@@ -411,9 +414,9 @@ if __name__ == '__main__':
 
         # name for plot
         plot_name = "summary_{}-tasks_{}-iters_{}-lr_{}-c_{}-prop_{}-z_{}".format(
-            args.experiment, args.tasks, args.iters, args.lr, args.dg_c, args.dg_si_prop, args.z_dim)
-        if args.experiment != "NMNIST":
-            m = re.search(r'\d+', args.experiment)
+            args.dataset, args.tasks, args.iters, args.lr, args.dg_c, args.dg_si_prop, args.z_dim)
+        if args.dataset != "NMNIST":
+            m = re.search(r'\d+', args.dataset)
 
             if m is not None:
                 classes_tot = int(m.group())
@@ -485,7 +488,7 @@ if __name__ == '__main__':
         sem_lines.append(new_sem_line)
     # ylim = (0.0, 0.9)
     ylim = (0.0, 100.0)
-    class_per_task = int(get_output_classes_number(args.experiment) / args.tasks)
+    class_per_task = int(get_output_classes_number(args.dataset) / args.tasks)
     figure = plt.plot_lines(ave_lines, x_axes=[class_per_task * i for i in x_axes],
                             line_names=names, colors=colors, title=title,
                             xlabel="Number of classes learned",ylim = ylim,
@@ -549,10 +552,10 @@ if __name__ == '__main__':
 
         # name for plot
         plot_name = "dc_BIRpH_{}-tasks_{}-iters_{}-lr_{}-c_{}-prop_{}-z_{}".format(
-            args.experiment, args.tasks, args.iters, args.lr, args.dg_c, args.dg_si_prop, args.z_dim)
-        if args.experiment != "NMNIST":
+            args.dataset, args.tasks, args.iters, args.lr, args.dg_c, args.dg_si_prop, args.z_dim)
+        if args.dataset != "NMNIST":
             
-            m = re.search(r'\d+', args.experiment)
+            m = re.search(r'\d+', args.dataset)
 
             if m is not None:
                 classes_tot = int(m.group())
@@ -634,7 +637,7 @@ if __name__ == '__main__':
     # ylim = (0.075, 0.225)
     ylim = (0.0, 100.0)   
     xlim = None
-    class_per_task = int(get_output_classes_number(args.experiment) / args.tasks)
+    class_per_task = int(get_output_classes_number(args.dataset) / args.tasks)
     
     figure = plt.plot_lines(ave_lines, x_axes=[class_per_task * i for i in x_axes],#[10:]],
                             line_names=names, colors=colors, title=title, ylim=ylim,
@@ -688,9 +691,9 @@ if __name__ == '__main__':
 
         # name for plot
         plot_name = "si_BIRpSI_{}-tasks_{}-iters_{}-lr_{}-c_{}-prop_{}-z_{}".format(
-            args.experiment, args.tasks, args.iters, args.lr, args.dg_c, args.dg_si_prop, args.z_dim)
-        if args.experiment != "NMNIST":
-            m = re.search(r'\d+', args.experiment)
+            args.dataset, args.tasks, args.iters, args.lr, args.dg_c, args.dg_si_prop, args.z_dim)
+        if args.dataset != "NMNIST":
+            m = re.search(r'\d+', args.dataset)
 
             if m is not None:
                 classes_tot = int(m.group())
@@ -764,7 +767,7 @@ if __name__ == '__main__':
     # ylim = (0.075, 0.225)
     ylim = (0.0, 100.0)
     xlim = None
-    class_per_task = int(get_output_classes_number(args.experiment) / args.tasks)
+    class_per_task = int(get_output_classes_number(args.dataset) / args.tasks)
     figure = plt.plot_lines(ave_lines, x_axes=[class_per_task * i for i in x_axes],#[10:]],
                             line_names=names, colors=colors, title=title,
                             xlabel="Number of classes learned", ylim = ylim,
