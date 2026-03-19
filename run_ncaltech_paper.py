@@ -304,7 +304,7 @@ if __name__ == '__main__':
 
         # BI-R & H (decay_rate is 0.3 and top_hab_neurons is 0.02)
         args.habituation = True
-        args.habituation_decay_rate = 0.7
+        args.habituation_decay_rate = 0.8
         args.top_hab_neurons = 0.02
         BIRpH_3_02 = {}
         #BIRpH_3_02 = collect_all(BIRpH_3_02, seed_list, args, name='BIR + H')
@@ -336,13 +336,13 @@ if __name__ == '__main__':
         args.si = True
         args.top_hab_neurons = 0.1
         args.dg_prop = args.dg_si_prop
-        args.si_c = 1000000
+        args.si_c = 10000
         BIRpSI_6 = {}
         #BIRpSI_6 = collect_all(BIRpSI_6, seed_list, args, name='BIR + SI')
 
         ## BI-R & SI (10^7)
         args.si = True
-        args.si_c = 100000
+        args.si_c = 10000
         BIRpSI_7 = {}
         BIRpSI_7 = collect_all(BIRpSI_7, seed_list, args, name='BIR + SI')
 
@@ -353,7 +353,7 @@ if __name__ == '__main__':
         #BIRpSI_8 = collect_all(BIRpSI_8, seed_list, args, name='BIR + SI')
 
         ## BI-R & SI & H (decay rate is 0.3 and top neuons is 0.2)
-        args.si_c = 100000
+        args.si_c = 10000000
         args.habituation = True
         args.habituation_decay_rate = 0.7
         args.top_hab_neurons = 0.1
