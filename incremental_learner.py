@@ -86,6 +86,9 @@ def run(args, verbose=False):
         verbose=verbose, only_test=(not args.train)
     )
 
+    for i, ds in enumerate(train_datasets, 1):
+        print(f"Task {i}: {len(ds)} samples")
+
     # -------------------------------------------------------------------------------------------------#
 
     # ----------------------#
