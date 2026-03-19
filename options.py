@@ -160,7 +160,7 @@ def set_defaults(args):
     args.fc_units = 2000 if args.fc_units is None else args.fc_units
 
     args.si_c = 1. if args.si_c is None else args.si_c
-    args.dg_prop = 0.7 if args.dg_prop is None else args.dg_prop
+    args.dg_prop = 0.8 if args.dg_prop is None else args.dg_prop
     args.dg_si_prop = 0.6 if args.dg_si_prop is None else args.dg_si_prop
     args.dg_c = 100000. if args.dg_c is None else args.dg_c
     # -for other unselected options, set default values (not specific to chosen experiment)
