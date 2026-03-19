@@ -155,8 +155,9 @@ def train_cl(model, train_datasets, replay_mode="none", rnt=None, classes_per_ta
             if not Offline_TaskIL:
                 iters_left -= 1
                 if iters_left == 0:
-                    data_loader = iter(utils.get_data_loader(train_dataset, batch_size, cuda=cuda, drop_last=True))
-                    iters_left = len(data_loader)
+                    loader = utils.get_data_loader(train_dataset, batch_size, cuda=cuda, drop_last=False)
+                    data_loader = iter(loader)
+                    iters_left = len(loader)
             else:
                 # -with "offline replay" in Task-IL scenario, there is a separate data-loader for each task
                 batch_size_to_use = int(np.ceil(batch_size / task))
@@ -164,7 +165,7 @@ def train_cl(model, train_datasets, replay_mode="none", rnt=None, classes_per_ta
                     iters_left[task_id] -= 1
                     if iters_left[task_id] == 0:
                         data_loader[task_id] = iter(utils.get_data_loader(
-                            train_datasets[task_id], batch_size_to_use, cuda=cuda, drop_last=True
+                            train_datasets[task_id], batch_size_to_use, cuda=cuda, drop_last=False
                         ))
                         iters_left[task_id] = len(data_loader[task_id])
 
