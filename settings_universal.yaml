@@ -3,7 +3,7 @@
 # Dataset:
 dataset:
   name: 'eventSym'   # ['NCALTECH12', 'NCALTECH256', 'NCALTECH101', 'NMNIST']
-  experiment: 'traffic'  # name of the experiment; will be used for naming the results directory
+  experiment: 'universal'  # name of the experiment; will be used for naming the results directory
 #Synaptic Intelligence:
 si:
   strength_regulator: None  # 'c' in the Equation 3.12
@@ -19,7 +19,7 @@ setup:
   seed: 20
   number_seeds: 1
   tasks: 10
-  iterations: 200  # Each iteration includes data from the dataset of size 'batch_size'
+  iterations: 3000  # Each iteration includes data from the dataset of size 'batch_size'
   batch_size: 32
   gating_proportion_decoder: 0.9  # The fraction of neurons in a decor that are gated (activations are set to zero)
   z_dimension: 4096  # The size of the latent variable representation (VAE)
