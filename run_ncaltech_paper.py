@@ -276,12 +276,12 @@ if __name__ == '__main__':
         BIR = {}
         BIR = collect_all(BIR, seed_list, args, name="Brain-Inspired Replay (BIR)")
 
-        # # BI-R & H (decay_rate is 0.5 and top_hab_neurons is 0.05)
-        # args.habituation = True
-        # args.habituation_decay_rate = 0.5
-        # args.top_hab_neurons = 0.05
-        # BIRpH_5_05 = {}
-        # BIRpH_5_05 = collect_all(BIRpH_5_05, seed_list, args, name='BIR + H')
+        # BI-R & H (decay_rate is 0.5 and top_hab_neurons is 0.05)
+        args.habituation = True
+        args.habituation_decay_rate = 0.5
+        args.top_hab_neurons = 0.05
+        BIRpH_5_05 = {}
+        BIRpH_5_05 = collect_all(BIRpH_5_05, seed_list, args, name='BIR + H')
 
         # # BI-R & H (decay_rate is 0.5 and top_hab_neurons is 0.1)
         # args.habituation = True
@@ -310,9 +310,9 @@ if __name__ == '__main__':
         #BIRpH_3_02 = collect_all(BIRpH_3_02, seed_list, args, name='BIR + H')
 
         # BI-R & H (decay_rate is 0.3 and top_hab_neurons is 0.2)
-        args.top_hab_neurons = 0.05
-        BIRpH_3_2 = {}
-        BIRpH_3_2 = collect_all(BIRpH_3_2, seed_list, args, name='BIR + H')
+        # args.top_hab_neurons = 0.05
+        # BIRpH_3_2 = {}
+        # BIRpH_3_2 = collect_all(BIRpH_3_2, seed_list, args, name='BIR + H')
 
         # # BI-R & H (decay_rate is 0.03 and top_hab_neurons is 0.05)
         # args.habituation_decay_rate = 0.03
@@ -338,13 +338,13 @@ if __name__ == '__main__':
         args.dg_prop = args.dg_si_prop
         args.si_c = 10000000
         BIRpSI_6 = {}
-        #BIRpSI_6 = collect_all(BIRpSI_6, seed_list, args, name='BIR + SI')
+        BIRpSI_6 = collect_all(BIRpSI_6, seed_list, args, name='BIR + SI')
 
         ## BI-R & SI (10^7)
-        args.si = True
-        args.si_c = 100000000
-        BIRpSI_7 = {}
-        BIRpSI_7 = collect_all(BIRpSI_7, seed_list, args, name='BIR + SI')
+        # args.si = True
+        # args.si_c = 100000000
+        # BIRpSI_7 = {}
+        # BIRpSI_7 = collect_all(BIRpSI_7, seed_list, args, name='BIR + SI')
 
         ## BI-R & SI (10^8)
         args.si = True
@@ -352,18 +352,18 @@ if __name__ == '__main__':
         BIRpSI_8 = {}
         #BIRpSI_8 = collect_all(BIRpSI_8, seed_list, args, name='BIR + SI')
 
-        ## BI-R & SI & H (decay rate is 0.3 and top neuons is 0.2)
-        args.si_c = 100000 
-        args.habituation = True
-        args.habituation_decay_rate = 0.8
-        args.top_hab_neurons = 0.1
-        BIRpSIpH_3_2 = {}
-        BIRpSIpH_3_2 = collect_all(BIRpSIpH_3_2, seed_list, args, name="BIR + SI + H")
+        # ## BI-R & SI & H (decay rate is 0.3 and top neuons is 0.2)
+        # args.si_c = 100000 
+        # args.habituation = True
+        # args.habituation_decay_rate = 0.8
+        # args.top_hab_neurons = 0.1
+        # BIRpSIpH_3_2 = {}
+        # BIRpSIpH_3_2 = collect_all(BIRpSIpH_3_2, seed_list, args, name="BIR + SI + H")
 
-        # ## BI-R & SI & H (decay rate is 0.3 and top neuons is 0.02)
-        # args.top_hab_neurons = 0.02
-        # BIRpSIpH_3_02 = {}
-        # BIRpSIpH_3_02 = collect_all(BIRpSIpH_3_02, seed_list, args, name="BIR + SI + H")
+        ## BI-R & SI & H (decay rate is 0.3 and top neuons is 0.02)
+        args.top_hab_neurons = 0.02
+        BIRpSIpH_3_02 = {}
+        BIRpSIpH_3_02 = collect_all(BIRpSIpH_3_02, seed_list, args, name="BIR + SI + H")
         #
         # ## BI-R & SI & H (decay rate is 0.03 and top neuons is 0.02)
         # args.habituation_decay_rate = 0.03
@@ -393,17 +393,17 @@ if __name__ == '__main__':
             prec[seed] = [
                 [0] * args.tasks if len(OFF) == 0 else OFF[seed][i]["average"],
                 [0] * args.tasks if len(BIR) == 0 else BIR[seed][i]["average"],
-                [0] * args.tasks if len(BIRpH_3_2) == 0 else BIRpH_3_2[seed][i]["average"],
-                [0] * args.tasks if len(BIRpSI_7) == 0 else BIRpSI_7[seed][i]["average"],
-                [0] * args.tasks if len(BIRpSIpH_3_2) == 0 else BIRpSIpH_3_2[seed][i]["average"],
+                [0] * args.tasks if len( BIRpH_5_05) == 0 else BIRpH_5_05[seed][i]["average"],
+                [0] * args.tasks if len(BIRpSI_6) == 0 else BIRpSI_6[seed][i]["average"],
+                [0] * args.tasks if len(BIRpSIpH_3_02) == 0 else BIRpSIpH_3_02[seed][i]["average"],
             ]
             i = 1
             ave_prec[seed] = [
                 [0] * args.tasks if len(OFF) == 0 else OFF[seed][i],
                 [0] * args.tasks if len(BIR) == 0 else BIR[seed][i],
-                [0] * args.tasks if len(BIRpH_3_2) == 0 else BIRpH_3_2[seed][i],
-                [0] * args.tasks if len(BIRpSI_7) == 0 else BIRpSI_7[seed][i],
-                [0] * args.tasks if len(BIRpSIpH_3_2) == 0 else BIRpSIpH_3_2[seed][i],
+                [0] * args.tasks if len(BIRpH_5_05) == 0 else BIRpH_5_05[seed][i],
+                [0] * args.tasks if len(BIRpSI_6) == 0 else BIRpSI_6[seed][i],
+                [0] * args.tasks if len(BIRpSIpH_3_02) == 0 else BIRpSIpH_3_02[seed][i],
             ]
 
         # -------------------------------------------------------------------------------------------------#
@@ -443,7 +443,7 @@ if __name__ == '__main__':
         title = ""
         ylabel_all = "Average precision (after all tasks)"
         ylabel = "Average precision (on tasks seen so far)"
-        x_axes = BIRpSI_7[args.seed][0]["x_task"]
+        x_axes = BIRpSI_6[args.seed][0]["x_task"]
 
         # select names / colors / ids
         # names = ["Batch", "None", "SI", "GR", "BIR", "BIR + SI", "BIR + SI + Habituation"]
@@ -525,7 +525,8 @@ if __name__ == '__main__':
                 #[0] * args.tasks if len(BIRpH_5_1) == 0 else BIRpH_5_1[seed][i]["average"],
                 #[0] * args.tasks if len(BIRpH_5_2) == 0 else BIRpH_5_2[seed][i]["average"],
                 #[0] * args.tasks if len(BIRpH_3_05) == 0 else BIRpH_3_05[seed][i]["average"],
-                [0] * args.tasks if len(BIRpH_3_2) == 0 else BIRpH_3_2[seed][i]["average"],
+
+                [0] * args.tasks if len(BIRpH_5_05) == 0 else BIRpH_5_05[seed][i]["average"],
                 [0] * args.tasks if len(BIRpH_3_02) == 0 else BIRpH_3_02[seed][i]["average"],
                 #[0] * args.tasks if len(BIRpH_03_05) == 0 else BIRpH_03_05[seed][i]["average"],
                 [0] * args.tasks if len(BIRpH_03_2) == 0 else BIRpH_03_2[seed][i]["average"],
@@ -537,7 +538,7 @@ if __name__ == '__main__':
                 #[0] * args.tasks if len(BIRpH_5_1) == 0 else BIRpH_5_1[seed][i],
                 #[0] * args.tasks if len(BIRpH_5_2) == 0 else BIRpH_5_2[seed][i],
                 #[0] * args.tasks if len(BIRpH_3_05) == 0 else BIRpH_3_05[seed][i],
-                [0] * args.tasks if len(BIRpH_3_2) == 0 else BIRpH_3_2[seed][i],
+                [0] * args.tasks if len(BIRpH_5_05) == 0 else BIRpH_3_2[seed][i],
                 [0] * args.tasks if len(BIRpH_3_02) == 0 else BIRpH_3_02[seed][i],
                 #[0] * args.tasks if len(BIRpH_03_05) == 0 else BIRpH_03_05[seed][i],
                 [0] * args.tasks if len(BIRpH_03_2) == 0 else BIRpH_03_2[seed][i],
@@ -672,6 +673,7 @@ if __name__ == '__main__':
         for seed in seed_list:
             i = 0
             prec[seed] = [
+                
                 [0] * args.tasks if len(BIRpSI_6) == 0 else BIRpSI_6[seed][i]["average"],
                 [0] * args.tasks if len(BIRpSI_7) == 0 else BIRpSI_7[seed][i]["average"],
                 [0] * args.tasks if len(BIRpSI_8) == 0 else BIRpSI_8[seed][i]["average"],
