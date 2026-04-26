@@ -209,6 +209,8 @@ def get_data_incremental_strategy(name, tasks, data_dir="./store/datasets",
         train_root = os.path.join(data_dir, "eventSym", "training")
         test_root  = os.path.join(data_dir, "eventSym", "testing")
 
+        print(f"Looking for EventSym classes in {train_root} and {test_root}...")
+
         # Count class folders under training/
         class_folders = []
         if os.path.isdir(train_root):
