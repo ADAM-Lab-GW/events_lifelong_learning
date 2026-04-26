@@ -343,7 +343,7 @@ if __name__ == '__main__':
         ## BI-R & SI (10^7)
         # args.si = True
         # args.si_c = 100000000
-        # BIRpSI_7 = {}
+        BIRpSI_7 = {}
         # BIRpSI_7 = collect_all(BIRpSI_7, seed_list, args, name='BIR + SI')
 
         ## BI-R & SI (10^8)
