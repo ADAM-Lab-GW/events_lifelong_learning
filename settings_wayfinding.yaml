@@ -3,7 +3,7 @@
 # Dataset:
 dataset:
   name: 'eventSym'   # ['NCALTECH12', 'NCALTECH256', 'NCALTECH101', 'NMNIST']
-  experiment: 'haz_x2'  # name of the experiment; will be used for naming the results directory
+  experiment: 'wayfinding'  # name of the experiment; will be used for naming the results directory
 #Synaptic Intelligence:
 si:
   strength_regulator: None  # 'c' in the Equation 3.12
