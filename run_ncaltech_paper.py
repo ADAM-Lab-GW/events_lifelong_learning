@@ -580,7 +580,7 @@ if __name__ == '__main__':
         # title = "Incremental class learning on \n {}{}: {} episodes".format(dataset_name, dataset_name_suffix,
         #                                                                     args.tasks)
         title = ""
-        x_axes = BIRpSI_7[args.seed][0]["x_task"]
+        x_axes = BIRpSI_6[args.seed][0]["x_task"]
 
         # select names / colors / ids
         # names = ["Batch", "None", "SI", "GR", "BIR", "BIR + SI", "BIR + SI + Habituation"]
