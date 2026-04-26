@@ -538,7 +538,7 @@ if __name__ == '__main__':
                 #[0] * args.tasks if len(BIRpH_5_1) == 0 else BIRpH_5_1[seed][i],
                 #[0] * args.tasks if len(BIRpH_5_2) == 0 else BIRpH_5_2[seed][i],
                 #[0] * args.tasks if len(BIRpH_3_05) == 0 else BIRpH_3_05[seed][i],
-                [0] * args.tasks if len(BIRpH_5_05) == 0 else BIRpH_3_2[seed][i],
+                [0] * args.tasks if len(BIRpH_5_05) == 0 else BIRpH_5_05[seed][i],
                 [0] * args.tasks if len(BIRpH_3_02) == 0 else BIRpH_3_02[seed][i],
                 #[0] * args.tasks if len(BIRpH_03_05) == 0 else BIRpH_03_05[seed][i],
                 [0] * args.tasks if len(BIRpH_03_2) == 0 else BIRpH_03_2[seed][i],
