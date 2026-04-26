@@ -692,100 +692,100 @@ if __name__ == '__main__':
         # --------------------#
 
         # name for plot
-        plot_name = "si_BIRpSI_{}-tasks_{}-iters_{}-lr_{}-c_{}-prop_{}-z_{}".format(
-            args.dataset, args.tasks, args.iters, args.lr, args.dg_c, args.dg_si_prop, args.z_dim)
-        if args.dataset != "NMNIST":
-            m = re.search(r'\d+', args.dataset)
+    #     plot_name = "si_BIRpSI_{}-tasks_{}-iters_{}-lr_{}-c_{}-prop_{}-z_{}".format(
+    #         args.dataset, args.tasks, args.iters, args.lr, args.dg_c, args.dg_si_prop, args.z_dim)
+    #     if args.dataset != "NMNIST":
+    #         m = re.search(r'\d+', args.dataset)
 
-            if m is not None:
-                classes_tot = int(m.group())
-            else:
-                # fallback: infer from dataset folders (training split)
-                train_root = os.path.join(args.d_dir, "eventSym", "training")
-                classes_tot = len([d for d in os.listdir(train_root) if os.path.isdir(os.path.join(train_root, d))])
-        else:
-            classes_tot = 10
-        dataset_name = "N-Caltech"
-        dataset_name_suffix = ""
-        if classes_tot == 12:
-            dataset_name_suffix = "256-12"
-        elif classes_tot == 256:
-            dataset_name_suffix = "256"
-        elif classes_tot == 100:
-            dataset_name_suffix = "101"
-        else:
-            dataset_name = "N-MNIST"
-            dataset_name_suffix = ""
-        # title = "Incremental class learning on \n {}{}: {} episodes".format(dataset_name, dataset_name_suffix,
-        #                                                                     args.tasks)
-        title = ""
-        x_axes = BIRpSI_7[args.seed][0]["x_task"]
+    #         if m is not None:
+    #             classes_tot = int(m.group())
+    #         else:
+    #             # fallback: infer from dataset folders (training split)
+    #             train_root = os.path.join(args.d_dir, "eventSym", "training")
+    #             classes_tot = len([d for d in os.listdir(train_root) if os.path.isdir(os.path.join(train_root, d))])
+    #     else:
+    #         classes_tot = 10
+    #     dataset_name = "N-Caltech"
+    #     dataset_name_suffix = ""
+    #     if classes_tot == 12:
+    #         dataset_name_suffix = "256-12"
+    #     elif classes_tot == 256:
+    #         dataset_name_suffix = "256"
+    #     elif classes_tot == 100:
+    #         dataset_name_suffix = "101"
+    #     else:
+    #         dataset_name = "N-MNIST"
+    #         dataset_name_suffix = ""
+    #     # title = "Incremental class learning on \n {}{}: {} episodes".format(dataset_name, dataset_name_suffix,
+    #     #                                                                     args.tasks)
+    #     title = ""
+    #     x_axes = BIRpSI_7[args.seed][0]["x_task"]
 
-        # select names / colors / ids
-        # names = ["Batch", "None", "SI", "GR", "BIR", "BIR + SI", "BIR + SI + Habituation"]
-        # colors = ["orange", "black", "pink", "blue", "red", "yellow", "green"]
-        # markers = ["X", "d", "*", "+", "h", "s", "v", "o"]
-        names = ['$c=10^6$', '$c=10^7$', '$c=10^8$']
-        colors = ["blue", "red", "green"]
-        markers = ["X", "d", "h"]
-        # ids = [0, 1, 2, 3, 4, 5, 6]
-        ids = [0, 1, 2]
+    #     # select names / colors / ids
+    #     # names = ["Batch", "None", "SI", "GR", "BIR", "BIR + SI", "BIR + SI + Habituation"]
+    #     # colors = ["orange", "black", "pink", "blue", "red", "yellow", "green"]
+    #     # markers = ["X", "d", "*", "+", "h", "s", "v", "o"]
+    #     names = ['$c=10^6$', '$c=10^7$', '$c=10^8$']
+    #     colors = ["blue", "red", "green"]
+    #     markers = ["X", "d", "h"]
+    #     # ids = [0, 1, 2, 3, 4, 5, 6]
+    #     ids = [0, 1, 2]
 
-    # open pdf
-    pp = plt.open_pdf("{}/{}.pdf".format(args.p_dir, plot_name))
-    figure_list = []
+    # # open pdf
+    # pp = plt.open_pdf("{}/{}.pdf".format(args.p_dir, plot_name))
+    # figure_list = []
 
-    # bar-plot
-    means = [np.mean([ave_prec[seed][id] for seed in seed_list]) for id in ids]
-    if args.n_seeds > 1:
-        sems = [np.sqrt(np.var([ave_prec[seed][id] for seed in seed_list]) / (len(seed_list) - 1)) for id in ids]
+    # # bar-plot
+    # means = [np.mean([ave_prec[seed][id] for seed in seed_list]) for id in ids]
+    # if args.n_seeds > 1:
+    #     sems = [np.sqrt(np.var([ave_prec[seed][id] for seed in seed_list]) / (len(seed_list) - 1)) for id in ids]
 
-    # print results to screen
-    print("\n\n" + "#" * 60 + "\nSUMMARY RESULTS: {}\n".format(title) + "-" * 60)
-    for i, name in enumerate(names):
-        if len(seed_list) > 1:
-            print("{:30s} {:5.2f}  (+/- {:4.2f}),  n={}".format(name, 100 * means[i], 100 * sems[i], len(seed_list)))
-        else:
-            print("{:34s} {:5.2f}".format(name, 100 * means[i]))
-    print("#" * 60)
+    # # print results to screen
+    # print("\n\n" + "#" * 60 + "\nSUMMARY RESULTS: {}\n".format(title) + "-" * 60)
+    # for i, name in enumerate(names):
+    #     if len(seed_list) > 1:
+    #         print("{:30s} {:5.2f}  (+/- {:4.2f}),  n={}".format(name, 100 * means[i], 100 * sems[i], len(seed_list)))
+    #     else:
+    #         print("{:34s} {:5.2f}".format(name, 100 * means[i]))
+    # print("#" * 60)
 
-    # line-plot
-    ave_lines = []
-    sem_lines = []
-    for id in ids:
-        new_ave_line = []
-        new_sem_line = []
-        for line_id in range(len(prec[args.seed][id])):
-            # if line_id < 10:
-            # continue
-            if line_id < 10 and len(prec[args.seed][id]) > 10:
-                continue
-            all_entries = [prec[seed][id][line_id]*100 for seed in seed_list]
-            new_ave_line.append(np.mean(all_entries))
-            if args.n_seeds > 1:
-                new_sem_line.append(np.sqrt(np.var(all_entries) / (len(all_entries) - 1)))
-        ave_lines.append(new_ave_line)
-        sem_lines.append(new_sem_line)
-    # ylim = (0.075, 0.225)
-    ylim = (0.0, 100.0)
-    xlim = None
-    class_per_task = int(get_output_classes_number(args.dataset) / args.tasks)
-    figure = plt.plot_lines(ave_lines, x_axes=[class_per_task * i for i in x_axes],#[10:]],
-                            line_names=names, colors=colors, title=title,
-                            xlabel="Number of classes learned", ylim = ylim,
-                            ylabel="Test accuracy",
-                            list_with_errors=sem_lines if args.n_seeds > 1 else None, markers=markers,
-                            font_scale=font_scale, xlim=xlim, chance_line=False)
-    figure_list.append(figure)
+    # # line-plot
+    # ave_lines = []
+    # sem_lines = []
+    # for id in ids:
+    #     new_ave_line = []
+    #     new_sem_line = []
+    #     for line_id in range(len(prec[args.seed][id])):
+    #         # if line_id < 10:
+    #         # continue
+    #         if line_id < 10 and len(prec[args.seed][id]) > 10:
+    #             continue
+    #         all_entries = [prec[seed][id][line_id]*100 for seed in seed_list]
+    #         new_ave_line.append(np.mean(all_entries))
+    #         if args.n_seeds > 1:
+    #             new_sem_line.append(np.sqrt(np.var(all_entries) / (len(all_entries) - 1)))
+    #     ave_lines.append(new_ave_line)
+    #     sem_lines.append(new_sem_line)
+    # # ylim = (0.075, 0.225)
+    # ylim = (0.0, 100.0)
+    # xlim = None
+    # class_per_task = int(get_output_classes_number(args.dataset) / args.tasks)
+    # figure = plt.plot_lines(ave_lines, x_axes=[class_per_task * i for i in x_axes],#[10:]],
+    #                         line_names=names, colors=colors, title=title,
+    #                         xlabel="Number of classes learned", ylim = ylim,
+    #                         ylabel="Test accuracy",
+    #                         list_with_errors=sem_lines if args.n_seeds > 1 else None, markers=markers,
+    #                         font_scale=font_scale, xlim=xlim, chance_line=False)
+    # figure_list.append(figure)
 
-    # add figures to pdf
-    for figure in figure_list:
-        pp.savefig(figure, bbox_inches="tight")
+    # # add figures to pdf
+    # for figure in figure_list:
+    #     pp.savefig(figure, bbox_inches="tight")
 
-    # close the pdf
-    pp.close()
+    # # close the pdf
+    # pp.close()
 
-    # Print name of generated plot on screen
-    print("\nGenerated plot: {}/{}.pdf\n".format(args.p_dir, plot_name))
+    # # Print name of generated plot on screen
+    # print("\nGenerated plot: {}/{}.pdf\n".format(args.p_dir, plot_name))
 
 
